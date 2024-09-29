@@ -92,3 +92,53 @@ footer {
 .sign-in-btn:hover, .upload-json-btn:hover {
     background-color: var(--std-btn-hover-color);
 }
+
+.supplement-btns {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.records-btn, .matchup-btn {
+    display: flex;
+    padding: var(--std-btn-padding);
+    font-family: var(--std-btn-font);
+    font-size: var(--std-btn-font-size);
+    background-color: var(--std-btn-color);
+    color: var(--std-button-text);
+    cursor: var(--std-button-cursor);
+    margin: var(--std-btn-margin);
+    white-space: nowrap;
+}
+
+.start-btn {
+    display: flex;
+    padding: var(--std-btn-padding);
+    font-family: var(--std-btn-font);
+    font-size: 40px;
+    background-color: var(--std-btn-color);
+    color: var(--std-button-text);
+    cursor: var(--std-button-cursor);
+    margin: var(--std-btn-margin);
+}
+
+.head-to-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.matchup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.song1-btn {
+    margin-right: 10%;
+}
+
+.song2-btn {
+    margin-left: 10%;
+}

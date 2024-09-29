@@ -1,0 +1,64 @@
+<!-- prettier-ignore-start -->
+{% extends "base.html" %} {% block title %}Game - Playlist Ranker{% endblock %} {% block header %}
+<script>
+	function songSelection(choice) {
+		const formData = new FormData();
+		formData.append("data", choice);
+		fetch("/song-selection", {
+			method: "POST",
+			body: formData,
+		});
+	}
+	function showH2H() {
+		const button = document.getElementById("start-btn");
+		const h2hDiv = document.getElementById("h2h-div");
+		button.style.display = "none";
+		h2hDiv.style.display = "block";
+	}
+	function uploadFile(button) {
+		const inputID = button.getAttribute("data-input-id");
+		document.getElementById(inputID).click();
+	}
+	function fileSelected(input) {
+		const formID = input.getAttribute("data-form-id");
+		document.getElementById(formID).submit();
+	}
+</script>
+<div class="supplement-btns">
+	<form id="uploadRecords" action="/upload-records" method="post" enctype="multipart/form-data" style="display: none">
+		<input
+			id="fileInput1"
+			type="file"
+			name="file"
+			accept=".json"
+			data-form-id="uploadRecords"
+			onchange="fileSelected(this)"
+		/>
+	</form>
+	<form id="uploadMatchups" action="/upload-matchups" method="post" enctype="multipart/form-data" style="display: none">
+		<input
+			id="fileInput2"
+			type="file"
+			name="file"
+			accept=".json"
+			data-form-id="uploadMatchups"
+			onchange="fileSelected(this)"
+		/>
+	</form>
+	<button class="records-btn" data-input-id="fileInput1" onclick="uploadFile(this)">Upload past records</button>
+	<button class="matchup-btn" data-input-id="fileInput2" onclick="uploadFile(this)">Upload completed matchups</button>
+</div>
+{% endblock %}
+<!-- prettier-ignore-end -->
+
+{% block content %}
+<button id="start-btn" class="start-btn" onclick="showH2H()" style="display: block">Start</button>
+<div id="h2h-div" class="head-to-head" style="display: none">
+	<p>Which song do you prefer??</p>
+	<div class="matchup">
+		<button class="song1-btn" onclick="songSelection(0)"></button>
+		vs.
+		<button class="song2-btn" onclick="songSelection(1)"></button>
+	</div>
+</div>
+{% endblock %}

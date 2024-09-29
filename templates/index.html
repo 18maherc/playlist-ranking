@@ -1,6 +1,17 @@
 <!-- prettier-ignore-start -->
 {% extends "base.html" %} {% block title %}Home - Playlist Ranker{% endblock %} {% block header %}
 <h1>Welcome to the Playlist Ranker!!</h1>
+<script>
+	function spotifySignIn() {}
+	function uploadFile(button) {
+		const inputID = button.getAttribute("data-input-id");
+		document.getElementById(inputID).click();
+	}
+	function fileSelected(input) {
+		const formID = input.getAttribute("data-form-id");
+		document.getElementById(formID).submit();
+	}
+</script>
 {% endblock %}
 <!-- prettier-ignore-end -->
 
@@ -22,15 +33,3 @@
 </form>
 <button class="upload-json-btn" data-input-id="fileInput1" onclick="uploadFile(this)">Upload JSON playlist</button>
 {% endblock %}
-
-<script>
-	function spotifySignIn() {}
-	function uploadFile(button) {
-		const inputID = button.getAttribute("data-input-id");
-		document.getElementById(inputID).click();
-	}
-	function fileSelected(input) {
-		const formID = input.getAttribute("data-form-id");
-		document.getElementById(formID).submit();
-	}
-</script>
