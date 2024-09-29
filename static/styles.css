@@ -9,9 +9,11 @@
     --std-btn-margin: 1%;
 }
 
-body {
+body, html {
+    height: 100%;
+    width: 100%;
     font-family: Verdana, sans-serif;
-    margin: 20px;
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -22,6 +24,41 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 100vh;
+}
+
+header {
+    flex-shrink: 0;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30%;
+}
+
+footer {
+    flex-shrink: 0;
+    padding: 5px 0;
+    margin-top: auto;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.footer-links img {
+    width: 30px;
+    height: 30px;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding: 5px;
 }
 
 .sign-in-btn {
@@ -33,10 +70,6 @@ body {
     color: var(--std-button-text);
     cursor: var(--std-button-cursor);
     margin: var(--std-btn-margin);
-}
-
-.sign-in-btn:hover {
-    background-color: var(--std-btn-hover-color);
 }
 
 .sign-in-btn .spotify-logo {
@@ -53,8 +86,9 @@ body {
     color: var(--std-button-text);
     cursor: var(--std-button-cursor);
     margin: var(--std-btn-margin);
+    white-space: nowrap;
 }
 
-.upload-json-btn:hover {
+.sign-in-btn:hover, .upload-json-btn:hover {
     background-color: var(--std-btn-hover-color);
 }

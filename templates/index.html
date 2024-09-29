@@ -1,50 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>My Python App</title>
-		<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
-	</head>
-	<body>
-		<div class="container">
-			<h1 style="margin-bottom: 40%">Welcome to the Playlist Ranker!!</h1>
-			<p>Select your starting point:</p>
-			<button class="sign-in-btn" onclick="spotifySignIn()">
-				Sign in
-				<img class="spotify-logo" src="{{ url_for('static', filename='spotify_logo.png') }}" />
-			</button>
-			<form
-				id="uploadPlaylist"
-				action="/upload-playlist"
-				method="post"
-				enctype="multipart/form-data"
-				style="display: none"
-			>
-				<input
-					id="fileInput1"
-					type="file"
-					name="file"
-					accept=".json"
-					data-form-id="uploadPlaylist"
-					onchange="fileSelected(this)"
-				/>
-			</form>
-			<button class="upload-json-btn" data-input-id="fileInput1" onclick="uploadFile(this)">
-				Upload JSON playlist
-			</button>
-		</div>
+<!-- prettier-ignore-start -->
+{% extends "base.html" %} {% block title %}Home - Playlist Ranker{% endblock %} {% block header %}
+<h1>Welcome to the Playlist Ranker!!</h1>
+{% endblock %}
+<!-- prettier-ignore-end -->
 
-		<script>
-			function spotifySignIn() {}
-			function uploadFile(button) {
-				const inputID = button.getAttribute("data-input-id");
-				document.getElementById(inputID).click();
-			}
-			function fileSelected(input) {
-				const formID = input.getAttribute("data-form-id");
-				document.getElementById(formID).submit();
-			}
-		</script>
-	</body>
-</html>
+{% block content %}
+<p>Select your starting point:</p>
+<button class="sign-in-btn" onclick="spotifySignIn()">
+	Sign in
+	<img class="spotify-logo" src="{{ url_for('static', filename='spotify_logo.png') }}" />
+</button>
+<form id="uploadPlaylist" action="/upload-playlist" method="post" enctype="multipart/form-data" style="display: none">
+	<input
+		id="fileInput1"
+		type="file"
+		name="file"
+		accept=".json"
+		data-form-id="uploadPlaylist"
+		onchange="fileSelected(this)"
+	/>
+</form>
+<button class="upload-json-btn" data-input-id="fileInput1" onclick="uploadFile(this)">Upload JSON playlist</button>
+{% endblock %}
+
+<script>
+	function spotifySignIn() {}
+	function uploadFile(button) {
+		const inputID = button.getAttribute("data-input-id");
+		document.getElementById(inputID).click();
+	}
+	function fileSelected(input) {
+		const formID = input.getAttribute("data-form-id");
+		document.getElementById(formID).submit();
+	}
+</script>

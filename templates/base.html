@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{% block title %}My Python App{% endblock %}</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+	</head>
+	<body>
+		<div class="container">
+			<header>
+				<h1>{% block header %}{% endblock %}</h1>
+			</header>
+			<main>{% block content %}{% endblock %}</main>
+			<footer>
+				<div class="footer-links">
+					<a href="https://github.com/18maherc"
+						><img src="{{ url_for('static', filename='github_logo.png') }}" alt="GitHub"
+					/></a>
+					<a href="https://open.spotify.com/user/swegmaster089"
+						><img src="{{ url_for('static', filename='spotify_logo.png') }}" alt="Spotify"
+					/></a>
+					<a href="https://linkedin.com/in/curtis-maher"
+						><img src="{{ url_for('static', filename='linkedin_logo.png') }}" alt="LinkedIn"
+					/></a>
+				</div>
+				<div class="footer-bottom">
+					<p>© 2024 Playlist Ranker. All rights reserved.</p>
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>
