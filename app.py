@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 import webbrowser
-import threading
+import os
 
 app = Flask(__name__)
 
@@ -10,10 +10,8 @@ def home():
     return render_template('index.html')
 
 
-def open_browser():
-    webbrowser.open_new('http://127.0.0.1:5000/')
-
-
 if __name__ == '__main__':
-    threading.Timer(1, open_browser).start()
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    if os.getenv('HEROKU_ENV', 'false') != 'true':
+        webbrowser.open(f'http://localhost:{port}')
+    app.run(host='0.0.0.0', port=port, debug=True, use_reloader=False)
