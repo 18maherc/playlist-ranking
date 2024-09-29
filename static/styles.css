@@ -1,0 +1,60 @@
+:root {
+    --std-btn-padding: 10px 20px;
+    --std-btn-font: Verdana, sans-serif;
+    --std-btn-font-size: 16px;
+    --std-btn-color: black;
+    --std-button-text: white;
+    --std-button-cursor: pointer;
+    --std-btn-hover-color: rgb(80, 80, 80);
+    --std-btn-margin: 1%;
+}
+
+body {
+    font-family: Verdana, sans-serif;
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: rgb(40, 200, 208);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sign-in-btn {
+    display: flex;
+    padding: var(--std-btn-padding);
+    font-family: var(--std-btn-font);
+    font-size: var(--std-btn-font-size);
+    background-color: var(--std-btn-color);
+    color: var(--std-button-text);
+    cursor: var(--std-button-cursor);
+    margin: var(--std-btn-margin);
+}
+
+.sign-in-btn:hover {
+    background-color: var(--std-btn-hover-color);
+}
+
+.sign-in-btn .spotify-logo {
+    margin-left: 10px;
+    width: 20px;
+    height: 20px;
+}
+
+.upload-json-btn {
+    padding: var(--std-btn-padding);
+    font-family: var(--std-btn-font);
+    font-size: var(--std-btn-font-size);
+    background-color: var(--std-btn-color);
+    color: var(--std-button-text);
+    cursor: var(--std-button-cursor);
+    margin: var(--std-btn-margin);
+}
+
+.upload-json-btn:hover {
+    background-color: var(--std-btn-hover-color);
+}

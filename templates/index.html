@@ -4,9 +4,30 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>My Python App</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
 	</head>
 	<body>
-		<h1>Welcome to My Python App!</h1>
-		<p>This is a simple web-based GUI for your application.</p>
+		<div class="container">
+			<h1 style="margin-bottom: 40%">Welcome to the Playlist Ranker!!</h1>
+			<p>Select your starting point:</p>
+			<button class="sign-in-btn" onclick="spotifySignIn()">
+				Sign in
+				<img
+					src="{{ url_for('static', filename='spotify_logo.png') }}"
+					class="spotify-logo"
+				/>
+			</button>
+			<button class="upload-json-btn" onclick="uploadPlaylist()">
+				Upload JSON playlist
+			</button>
+		</div>
+
+		<script>
+			function spotifySignIn() {}
+			function uploadPlaylist() {}
+		</script>
 	</body>
 </html>
