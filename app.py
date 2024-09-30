@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import webbrowser
 import os
 import playlist_manager
@@ -18,7 +18,7 @@ def home():
 
 @app.route('/game')
 def game():
-    return render_template('game.html')
+    return render_template('game.html', song_tuple=(None, None))
 
 
 # -------- Workflows --------
@@ -62,6 +62,14 @@ def upload_matchups():
         return redirect(url_for('game'))
     else:
         return 'Invalid file type. Please upload a JSON file.'
+
+
+@app.route('/create-matchup', methods=['POST'])
+def create_matchup():
+    matchup = playlist.get_matchup()
+    while records.check_matchup_completed(matchup):
+        matchup = playlist.get_matchup
+    return jsonify(song_tuple=matchup)
 
 
 if __name__ == '__main__':

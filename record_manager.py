@@ -13,3 +13,6 @@ class RecordManager():
     def upload_matchups(self, file):
         # TODO: add schema checking to validate this is a list of songs with ELO scores
         self.completed_matchups = json.load(file)
+
+    def check_matchup_completed(self, matchup: tuple) -> bool:
+        return tuple(sorted(matchup)) in self.completed_matchups
