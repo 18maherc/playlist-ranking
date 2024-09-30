@@ -1,5 +1,9 @@
-<!-- prettier-ignore-start -->
-{% extends "base.html" %} {% block title %}Game - Playlist Ranker{% endblock %} {% block header %}
+<!-- prettier-ignore -->
+{% extends "base.html" %}
+<!-- prettier-ignore -->
+{% block title %}Game - Playlist Ranker{% endblock %}
+<!-- prettier-ignore -->
+{% block header %}
 <script>
 	function songSelection(choice) {
 		const formData = new FormData();
@@ -45,20 +49,21 @@
 			onchange="fileSelected(this)"
 		/>
 	</form>
-	<button class="records-btn" data-input-id="fileInput1" onclick="uploadFile(this)">Upload past records</button>
-	<button class="matchup-btn" data-input-id="fileInput2" onclick="uploadFile(this)">Upload completed matchups</button>
+	<button class="upload-supp-btn" data-input-id="fileInput1" onclick="uploadFile(this)">Upload past records</button>
+	<button class="upload-supp-btn" data-input-id="fileInput2" onclick="uploadFile(this)">
+		Upload completed matchups
+	</button>
 </div>
 {% endblock %}
-<!-- prettier-ignore-end -->
-
+<!-- prettier-ignore -->
 {% block content %}
 <button id="start-btn" class="start-btn" onclick="showH2H()" style="display: block">Start</button>
 <div id="h2h-div" class="head-to-head" style="display: none">
 	<p>Which song do you prefer??</p>
 	<div class="matchup">
-		<button class="song1-btn" onclick="songSelection(0)"></button>
-		vs.
-		<button class="song2-btn" onclick="songSelection(1)"></button>
+		<button class="song-btn" onclick="songSelection(0)"></button>
+		<span class="center-text">vs.</span>
+		<button class="song-btn" onclick="songSelection(1)"></button>
 	</div>
 </div>
 {% endblock %}
