@@ -3,11 +3,13 @@ import webbrowser
 import os
 import playlist_manager
 import record_manager
+import game_manager
 
 app = Flask(__name__)
 
 playlist = playlist_manager.PlaylistManager()
 records = record_manager.RecordManager()
+elo_game = game_manager.GameManager()
 
 
 # -------- Pages --------
@@ -68,8 +70,17 @@ def upload_matchups():
 def create_matchup():
     matchup = playlist.get_matchup()
     while records.check_matchup_completed(matchup):
-        matchup = playlist.get_matchup
-    return jsonify(song_tuple=matchup)
+        matchup = playlist.get_matchup()
+    matchup_strings = elo_game.set_current_matchup(matchup)
+    return jsonify(song_tuple=matchup_strings)
+
+
+@app.route('/song-selection', methods=['POST'])
+def song_selection():
+    selection = request.form['data']
+    result_matchup, result_winner = elo_game.calculate_winner(selection)
+    records.complete_matchup(result_matchup, result_winner)
+    return create_matchup()
 
 
 if __name__ == '__main__':

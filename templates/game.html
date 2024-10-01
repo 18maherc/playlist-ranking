@@ -11,7 +11,12 @@
 		fetch("/song-selection", {
 			method: "POST",
 			body: formData,
-		});
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				document.querySelectorAll(".song-btn")[0].textContent = data.song_tuple[0];
+				document.querySelectorAll(".song-btn")[1].textContent = data.song_tuple[1];
+			});
 	}
 	function showH2H() {
 		const button = document.getElementById("start-btn");
