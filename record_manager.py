@@ -24,6 +24,12 @@ class RecordManager():
     def _sorted_matchup(self, matchup: tuple) -> tuple[str, str]:
         return tuple(sorted(matchup, key=lambda song: song.name))
 
-    # def export_matchups(self, file):
-    #   json_serializable_dict = {str(k): v for k, v in song_dict.items()}
-    #   json.dump(json_serializable_dict, file, indent=4)
+    def export_records(self):
+        json_serializable_dict = {
+            str(k): v for k, v in self.song_records.items()}
+        return json.dumps(json_serializable_dict, indent=4)
+
+    def export_matchups(self):
+        json_serializable_dict = {
+            str(k): v for k, v in self.completed_matchups.items()}
+        return json.dumps(json_serializable_dict, indent=4)

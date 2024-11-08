@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, Response
 import webbrowser
 import os
+import io
 import playlist_manager
 import record_manager
 import game_manager
@@ -64,6 +65,23 @@ def upload_matchups():
         return redirect(url_for('game'))
     else:
         return 'Invalid file type. Please upload a JSON file.'
+
+
+@app.route('/export-file', methods=['GET'])
+def export_file():
+    selection = request.args.get('selection')
+    if selection == 'records':
+        export_file = records.export_records()
+    elif selection == 'matchups':
+        export_file = records.export_matchups()
+    else:
+        return jsonify({'error': 'Invalid export type'}), 400
+
+    buffer = io.BytesIO()
+    buffer.write(export_file.encode('utf-8'))
+    buffer.seek(0)
+
+    return Response(buffer, mimetype='application/json', headers={'Content-Disposition': f'attachment;filename={selection}.json'})
 
 
 @app.route('/create-matchup', methods=['POST'])

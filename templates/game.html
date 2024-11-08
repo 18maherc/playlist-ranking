@@ -38,6 +38,10 @@
 		const formID = input.getAttribute("data-form-id");
 		document.getElementById(formID).submit();
 	}
+	function exportFile(exportSelection) {
+		const url = `/export-file?selection=${exportSelection}`;
+		window.location.href = url;
+	}
 </script>
 <div class="supplement-btns">
 	<form id="uploadRecords" action="/upload-records" method="post" enctype="multipart/form-data" style="display: none">
@@ -64,6 +68,10 @@
 	<button class="upload-supp-btn" data-input-id="fileInput2" onclick="uploadFile(this)">
 		Upload completed matchups
 	</button>
+</div>
+<div class="export-btns">
+	<button class="export-btn" onclick="exportFile('records')">Export current records</button>
+	<button class="export-btn" onclick="exportFile('matchups')">Export completed matchups</button>
 </div>
 {% endblock %}
 <!-- prettier-ignore -->

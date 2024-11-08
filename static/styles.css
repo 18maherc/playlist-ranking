@@ -93,13 +93,13 @@ footer {
     background-color: var(--std-btn-hover-color);
 }
 
-.supplement-btns {
+.supplement-btns, .export-btns {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.upload-supp-btn {
+.upload-supp-btn, .export-btn {
     display: flex;
     padding: var(--std-btn-padding);
     font-family: var(--std-btn-font);
