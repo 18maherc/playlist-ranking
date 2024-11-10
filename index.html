@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Playlist Ranker</title>
+
+		<!-- Styles -->
+		<link rel="stylesheet" href="styles.css" />
+
+		<!-- Scripting -->
+		<script type="text/javascript" src="playlistManager.js"></script>
+		<script type="text/javascript" src="gameManager.js"></script>
+	</head>
+	<body>
+		<header>
+			<h1>Spotify Playlist Ranker</h1>
+			<p>
+				Upload a playlist to start ranking songs with them. As you keep ranking more and more songs, each song will gain
+				ELO points. The best songs have the highest ELO.
+			</p>
+		</header>
+
+		<article>
+			<div class="card card1" onclick="">
+				<div class="song song1">
+					<h1 class="title">Loyal</h1>
+					<h2 class="artist">ODESZA</h2>
+					<h3 class="album">A Moment Apart (Deluxe Edition)</h3>
+				</div>
+				<p>
+					ELO: <b>1089</b> <span class="rank">(Current rank: <b>#89</b>)</span>
+				</p>
+			</div>
+
+			<div class="versus">
+				<h1>VS</h1>
+			</div>
+
+			<div class="card card2" onclick="">
+				<div class="song song2">
+					<h1 class="title">San Juan</h1>
+					<h2 class="artist">Chronologist</h2>
+					<h3 class="album">Cartographer</h3>
+				</div>
+				<p>
+					ELO: <b>1023</b> <span class="rank">(Current rank: <b>#23</b>)</span>
+				</p>
+			</div>
+		</article>
+
+		<div class="file-btns">
+			<button id="uploadJSON">Upload song data</button>
+			<button id="exportJSON">Export song data</button>
+		</div>
+		<div class="ranking">Current (top 25) rankings of songs, as well as their ELOs, in a neat list</div>
+
+		<!-- TODO: this isn't locked to the bottom of the page -->
+		<footer>
+			<div class="footer-links">
+				<a class="github" href="https://github.com/18maherc" target="_blank" rel="noopener noreferrer">
+					<img src="svg/github.svg" alt="GitHub" />
+				</a>
+				<p>•</p>
+				<a class="spotify" href="https://open.spotify.com/user/swegmaster089" target="_blank" rel="noopener noreferrer">
+					<img src="svg/spotify.svg" alt="Spotify" />
+				</a>
+				<p>•</p>
+				<a class="linkedin" href="https://linkedin.com/in/curtis-maher" target="_blank" rel="noopener noreferrer">
+					<img src="svg/linkedin.svg" alt="LinkedIn" />
+				</a>
+				<p>•</p>
+				<a class="vins-github" href="https://github.com/sharmavins23" target="_blank" rel="noopener noreferrer">
+					<img src="svg/infinity.svg" alt="@sharmavins23" />
+				</a>
+			</div>
+			<div class="footer-bottom">
+				<p>© 2024 <span class="fire-text">Playlist Ranker</span>. All rights reserved.</p>
+			</div>
+		</footer>
+	</body>
+</html>
