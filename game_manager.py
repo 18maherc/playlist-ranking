@@ -19,12 +19,8 @@ class GameManager():
         return self.current_matchup[0].name, self.current_matchup[1].name
 
     def calculate_winner(self, win_choice: int) -> tuple[tuple, str]:
-        if win_choice:
-            winning_song = self.current_matchup[1]
-            losing_song = self.current_matchup[0]
-        else:
-            winning_song = self.current_matchup[0]
-            losing_song = self.current_matchup[1]
+        winning_song = self.current_matchup[win_choice]
+        losing_song = self.current_matchup[1-win_choice]
 
         winning_song.elo, losing_song.elo = self._calculate_elo(
             winning_song.elo, losing_song.elo)

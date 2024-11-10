@@ -15,14 +15,15 @@ class RecordManager():
         self.completed_matchups = json.load(file)
 
     def check_matchup_completed(self, matchup: tuple) -> bool:
-        return tuple(song.name for song in self._sorted_matchup(matchup)) in self.completed_matchups
+        return self._sorted_matchup(matchup) in self.completed_matchups
 
     def complete_matchup(self, matchup: tuple, winner: str):
         self.completed_matchups[self._sorted_matchup(matchup)] = winner
         # TODO: update records for each song in the matchup
 
     def _sorted_matchup(self, matchup: tuple) -> tuple[str, str]:
-        return tuple(sorted(matchup, key=lambda song: song.name))
+        sorted_matchup = sorted(matchup, key=lambda song: song.name)
+        return tuple(song.name for song in sorted_matchup)
 
     def export_records(self):
         json_serializable_dict = {

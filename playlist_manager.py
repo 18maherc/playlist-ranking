@@ -15,10 +15,10 @@ class PlaylistManager():
             self.song_list.append(Song(song, score))
 
     def get_matchup(self) -> tuple:
-        first = random.randint(0, len(self.song_list))
-        second = random.randint(0, len(self.song_list))
+        first = random.randint(0, len(self.song_list)-1)
+        second = random.randint(0, len(self.song_list)-1)
         while second == first:
-            second = random.randint(0, len(self.song_list))
+            second = random.randint(0, len(self.song_list)-1)
         song1 = self.song_list[first]
         song2 = self.song_list[second]
         return song1, song2

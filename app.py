@@ -95,7 +95,7 @@ def create_matchup():
 
 @app.route('/song-selection', methods=['POST'])
 def song_selection():
-    selection = request.form['data']
+    selection = int(request.form['data'])
     result_matchup, result_winner = elo_game.calculate_winner(selection)
     records.complete_matchup(result_matchup, result_winner)
     return create_matchup()
