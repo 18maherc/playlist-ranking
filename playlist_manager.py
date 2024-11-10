@@ -34,4 +34,4 @@ class Song():
     def __init__(self, name: str, elo: float) -> None:
         self.name = name
         self.elo = elo
-        self.json_object = {name: elo}
+        self.json_object = {self.name: self.elo}

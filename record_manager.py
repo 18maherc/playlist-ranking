@@ -19,7 +19,8 @@ class RecordManager():
 
     def complete_matchup(self, matchup: tuple, winner: str):
         self.completed_matchups[self._sorted_matchup(matchup)] = winner
-        # TODO: update records for each song in the matchup
+        for song in matchup:
+            self.song_records.update(song.json_object)
 
     def _sorted_matchup(self, matchup: tuple) -> tuple[str, str]:
         sorted_matchup = sorted(matchup, key=lambda song: song.name)
