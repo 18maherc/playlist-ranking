@@ -15,8 +15,9 @@ function openFileSelector() {
                 try {
                     const jsonData = JSON.parse(e.target.result);
                     // Create an instance of PlaylistManager and upload the data
-                    const playlistManager = new PlaylistManager();
-                    playlistManager.uploadPlaylist(jsonData);
+                    currentPlaylistManager = new PlaylistManager();
+                    currentPlaylistManager.uploadPlaylist(jsonData);
+                    startMatchups();
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
                 }
@@ -29,6 +30,7 @@ function openFileSelector() {
 }
 
 function startMatchups() {
+    console.log('Starting matchups, currentPlaylistManager:', currentPlaylistManager); // Check if manager exists
     if (currentPlaylistManager) {
         // Get matchup elements
         const matchup = currentPlaylistManager.getMatchup();
@@ -39,11 +41,42 @@ function startMatchups() {
 }
 
 function displayMatchup(matchup) {
+    if (!matchup || matchup.length !== 2) {
+        console.error('Invalid matchup');
+        return;
+    }
+
     const [song1, song2] = matchup;
+    console.log('Displaying songs:', song1, song2); // Check songs being displayed
+
     
-    // Update UI elements with song1 and song2
-    document.getElementById('song1-title').textContent = song1.title;
-    document.getElementById('song2-title').textContent = song2.title;
+    // Update the card contents
+    try {
+        // First card
+        const song1Title = document.querySelector('.song.song1 .title');
+        const song1Artist = document.querySelector('.song.song1 .artist');
+        const song1Album = document.querySelector('.song.song1 .album');
+        const song1Elo = document.querySelector('.card1 p b');
+
+        if (song1Title) song1Title.textContent = song1.title || 'Unknown Title';
+        if (song1Artist) song1Artist.textContent = song1.artist || 'Unknown Artist';
+        if (song1Album) song1Album.textContent = song1.album || 'Unknown Album';
+        if (song1Elo) song1Elo.textContent = song1.elo || 'Unknown ELO';
+
+        // Second card
+        const song2Title = document.querySelector('.song.song2 .title');
+        const song2Artist = document.querySelector('.song.song2 .artist');
+        const song2Album = document.querySelector('.song.song2 .album');
+        const song2Elo = document.querySelector('.card2 p b');
+
+        if (song2Title) song2Title.textContent = song2.title || 'Unknown Title';
+        if (song2Artist) song2Artist.textContent = song2.artist || 'Unknown Artist';
+        if (song2Album) song2Album.textContent = song2.album || 'Unknown Album';
+        if (song2Elo) song2Elo.textContent = song2.elo || 'Unknown ELO';
+
+    } catch (error) {
+        console.error('Error updating display:', error);
+    }
 }
 
 class PlaylistManager {
@@ -108,14 +141,3 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadButton = document.getElementById('uploadJSON');
     uploadButton.addEventListener('click', openFileSelector);
 });
-
-function displayMatchup(matchup) {
-    const [song1, song2] = matchup;
-    
-    // Update the card contents
-    document.querySelector('.song1 .title').textContent = song1.title;
-    document.querySelector('.song1 + p b').textContent = song1.elo;
-    
-    document.querySelector('.song2 .title').textContent = song2.title;
-    document.querySelector('.song2 + p b').textContent = song2.elo;
-}
