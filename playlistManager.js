@@ -74,6 +74,13 @@ function displayMatchup(matchup) {
         if (song2Album) song2Album.textContent = song2.album || 'Unknown Album';
         if (song2Elo) song2Elo.textContent = song2.elo || 'Unknown ELO';
 
+        // Update the game manager with the current matchup
+        if(gameManager){
+            gameManager.setCurrentMatchup(matchup);
+        } else {
+            console.error('Game manager not initialized');
+        }
+
     } catch (error) {
         console.error('Error updating display:', error);
     }
@@ -87,8 +94,12 @@ class PlaylistManager {
 
     uploadPlaylist(jsonData){
         // TODO: add schema validation??
-        this.records = jsonData.Records;
-        // this.completedMatchups = jsonData.CompletedMatchups;
+        if(jsonData.Records){
+            this.records = jsonData.Records;
+        }
+        if(jsonData.CompletedMatchups){
+            this.completedMatchups = jsonData.CompletedMatchups;
+        }
         console.log('Playlist uploaded:', this.records);
     }
 
@@ -115,8 +126,13 @@ class PlaylistManager {
         let randomIndex = Math.random() * remainingIndices.length | 0;
         let song2 = {
             title: songTitles[remainingIndices[randomIndex]],
-            elo: this.records[songTitles[remainingIndices[randomIndex]]]
+            artist: 0,
+            album: 0,
+            elo: this.records[songTitles[remainingIndices[randomIndex]]],
+            art: 0
         };
+
+        console.log('Matchup:', [song1, song2])
         
         return [song1, song2];
     }
@@ -125,13 +141,33 @@ class PlaylistManager {
         return this.#sortedMatchup(matchup) in this.completedMatchups;
     }
 
-    completeMatchup(matchup, winner) {
-        this.completedMatchups[this.#sortedMatchup(matchup)] = winner;
-        this.records;
+    completeMatchup(matchup, result) {
+        const { winner, loser, newElos } = result;
+
+        // Update the records with new ELO ratings
+        this.records[winner.title] = Math.round(newElos.winner);
+        this.records[loser.title] = Math.round(newElos.loser);
+
+        // Store the completed matchup result
+        const matchupKey = this.#sortedMatchup(matchup);
+        this.completedMatchups[matchupKey] = winner.title;
+
+        console.log(`Updated ELO ratings:
+            ${winner.title}: ${newElos.winner}
+            ${loser.title}: ${newElos.loser}`);
     }
 
     #sortedMatchup(matchup) {
-        return matchup.sort((a, b) => a.title.localeCompare(b.title));
+        if (!matchup || matchup.length !== 2) {
+            console.error('Invalid matchup for sorting:', matchup);
+            return null;
+        }
+    
+        // Sort the titles alphabetically to ensure consistent ordering
+        const titles = [matchup[0].title, matchup[1].title].sort();
+        
+        // Create a consistent matchup string format
+        return `${titles[0]} vs ${titles[1]}`;
     }
 
     exportJSON() {

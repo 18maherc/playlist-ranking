@@ -1,4 +1,25 @@
 // gameManager.js
+let gameManager = null;
+
+function songSelection(selection) {
+    if (currentPlaylistManager) {
+        // Get current matchup
+        const currentMatchup = gameManager.getCurrentMatchup();
+
+        const result = gameManager.calculateWinner(selection);
+        if (!result) {
+            console.error('Failed to calculate winner');
+            return;
+        }
+
+        // Record the winner
+        currentPlaylistManager.completeMatchup(currentMatchup, result);
+        
+        // Get and display next matchup
+        const nextMatchup = currentPlaylistManager.getMatchup();
+        displayMatchup(nextMatchup);
+    }
+}
 
 class GameManager {
     constructor() {
@@ -28,6 +49,11 @@ class GameManager {
     }
 
     calculateWinner(winChoice){
+        if (!this.currentMatchup || !this.currentMatchup[0] || !this.currentMatchup[1]) {
+            console.error('Invalid matchup data:', this.currentMatchup);
+            return null;
+        }
+
         let winningSong = this.currentMatchup[winChoice];
         let losingSong = this.currentMatchup[1 - winChoice];
 
@@ -36,11 +62,16 @@ class GameManager {
         winningSong.elo = eloUpdate.winner;
         losingSong.elo = eloUpdate.loser;
 
-        return winningSong;
+        return {
+            winner: winningSong,
+            loser: losingSong,
+            newElos: eloUpdate
+        };
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    gameManager = new GameManager()
     // Add click handlers for the song cards
     const card1 = document.querySelector('.card1');
     const card2 = document.querySelector('.card2');
@@ -53,26 +84,3 @@ document.addEventListener('DOMContentLoaded', () => {
         songSelection(1);
     });
 });
-
-function songSelection(selection) {
-    if (currentPlaylistManager) {
-        // Get current matchup
-        const currentMatchup = [
-            {
-                title: document.querySelector('.song1 .title').textContent,
-                elo: parseInt(document.querySelector('.song1 + p b').textContent)
-            },
-            {
-                title: document.querySelector('.song2 .title').textContent,
-                elo: parseInt(document.querySelector('.song2 + p b').textContent)
-            }
-        ];
-
-        // Record the winner
-        currentPlaylistManager.completeMatchup(currentMatchup, currentMatchup[selection]);
-        
-        // Get and display next matchup
-        const nextMatchup = currentPlaylistManager.getMatchup();
-        displayMatchup(nextMatchup);
-    }
-}
