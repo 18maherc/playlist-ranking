@@ -103,7 +103,10 @@ class PlaylistManager {
         let index1 = Math.random() * songTitles.length | 0;
         let song1 = {
             title: songTitles[index1],
-            elo: this.records[songTitles[index1]]
+            artist: 0,
+            album: 0,
+            elo: this.records[songTitles[index1]],
+            art: 0
         };
         
         // Get second random song by picking from remaining songs
@@ -132,12 +135,56 @@ class PlaylistManager {
     }
 
     exportJSON() {
-        // TODO: return json file of object with records and matchups objects
+        // Create the export object containing records and completed matchups
+        const exportData = {
+            Records: this.records,
+            CompletedMatchups: this.completedMatchups
+        };
+    
+        // Convert the data to a JSON string
+        const jsonString = JSON.stringify(exportData, null, 2);
+    
+        // Create a Blob containing the JSON data
+        const blob = new Blob([jsonString], { type: 'application/json' });
+    
+        // Create a URL for the Blob
+        const url = URL.createObjectURL(blob);
+    
+        // Create a temporary anchor element
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'playlist-rankings.json'; // Default filename
+    
+        // Append to document, click programmatically, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    
+        // Clean up by revoking the URL
+        URL.revokeObjectURL(url);
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Upload button handler
+    // Add upload button handler with existence check
     const uploadButton = document.getElementById('uploadJSON');
-    uploadButton.addEventListener('click', openFileSelector);
+    if (uploadButton) {
+        uploadButton.addEventListener('click', openFileSelector);
+    } else {
+        console.error('Upload button not found');
+    }
+
+    // Add export button handler
+    const exportButton = document.getElementById('exportJSON');
+    if (exportButton) {
+        exportButton.addEventListener('click', () => {
+            if (currentPlaylistManager) {
+                currentPlaylistManager.exportJSON();
+            } else {
+                console.error('No playlist data to export');
+            }
+        });
+    } else {
+        console.error('Export button not found');
+    }
 });
