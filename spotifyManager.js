@@ -50,16 +50,62 @@ function setupEventListeners() {
             }
         });
     }
+
+    if (selectPlaylistButton) {
+        // Remove any existing listeners first
+        selectPlaylistButton.replaceWith(selectPlaylistButton.cloneNode(true));
+        selectPlaylistButton = document.getElementById('selectPlaylist');
+
+        selectPlaylistButton.addEventListener('click', async () => {
+            console.log("select playlist button clicked")
+            if (spotifyManager) {
+                try {
+                    playlists = await spotifyManager.getUserPlaylists();
+
+                    // Create a dropdown with the playlists
+                    const playlistSelect = document.createElement('select');
+                    playlistSelect.id = 'playlist-select';
+                    
+                    playlists.forEach(playlist => {
+                        const option = document.createElement('option');
+                        option.value = playlist.id;
+                        option.textContent = `${playlist.name} (${playlist.tracks.total} tracks)`;
+                        playlistSelect.appendChild(option);
+                    });
+
+                    // Add the dropdown to the page
+                    const container = document.getElementById('playlist-container'); // Make sure you have this element in your HTML
+                    if (container) {
+                        container.innerHTML = ''; // Clear any existing content
+                        container.appendChild(playlistSelect);
+                    }
+                    // TODO: add default option
+                    // TODO: handle a selection ("change") being made
+
+                    // Hide other content
+                    signInButton.hidden = true;
+                    selectPlaylistButton.hidden = true;
+                    insertLinkButton.hidden = true;
+                } catch (error) {
+                    console.error('Error handling playlists:', error);
+                    if (error.message.includes('No access token found')) {
+                        resetAuthState();
+                    }
+                }
+            }
+        });
+    }
 }
 
 class SpotifyManager {
     constructor() {
         this.clientId = 'ce3914433ab04d3189ece1b95ca11ec5';
         this.redirectUri = 'http://127.0.0.1:5500/index.html';
-        this.scope = 'user-read-private user-read-email';
-        this.codeVerifier = this.generateRandomString(64);
+        this.scope = 'user-read-private user-read-email playlist-read-private';
+        this.codeVerifier = this.#generateRandomString(64);
         this.authUrl = new URL("https://accounts.spotify.com/authorize");
         this.tokenUrl = "https://accounts.spotify.com/api/token";
+        this.accessToken = localStorage.getItem('access_token');
     }
 
     async initialize() {
@@ -77,11 +123,11 @@ class SpotifyManager {
             
             if (code) {
                 window.history.replaceState({}, document.title, "/");
-                return await this.getToken(code);
+                return await this.#getToken(code);
             } else {
                 // Start the authorization flow
-                this.hashed = await this.sha256(this.codeVerifier);
-                this.codeChallenge = this.base64encode(this.hashed);
+                this.hashed = await this.#sha256(this.codeVerifier);
+                this.codeChallenge = this.#base64encode(this.hashed);
                 
                 const params = {
                     response_type: 'code',
@@ -90,7 +136,7 @@ class SpotifyManager {
                     code_challenge_method: 'S256',
                     code_challenge: this.codeChallenge,
                     redirect_uri: this.redirectUri,
-                    state: this.generateRandomString(16), // Add state parameter for security
+                    state: this.#generateRandomString(16), // Add state parameter for security
                 };
 
                 window.localStorage.setItem('code_verifier', this.codeVerifier);
@@ -104,26 +150,26 @@ class SpotifyManager {
         }
     }
 
-    generateRandomString (length) {
+    #generateRandomString (length) {
         const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         const values = crypto.getRandomValues(new Uint8Array(length));
         return values.reduce((acc, x) => acc + possible[x % possible.length], "");
     }
     
-    async sha256 (plain) {
+    async #sha256 (plain) {
         const encoder = new TextEncoder()
         const data = encoder.encode(plain)
         return window.crypto.subtle.digest('SHA-256', data)
     }
     
-    base64encode (input) {
+    #base64encode (input) {
         return btoa(String.fromCharCode(...new Uint8Array(input)))
           .replace(/=/g, '')
           .replace(/\+/g, '-')
           .replace(/\//g, '_');
     }
 
-    async getToken(code) {
+    async #getToken(code) {
         try {
             const codeVerifier = localStorage.getItem('code_verifier');
             
@@ -147,6 +193,7 @@ class SpotifyManager {
             const data = await response.json();
 
             if (response.ok) {
+                this.accessToken = data.access_token;
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.removeItem('code_verifier');
 
@@ -157,7 +204,6 @@ class SpotifyManager {
                             'Authorization': `Bearer ${data.access_token}`
                         }
                     });
-                    
                     if (testResponse.ok) {
                         const userData = await testResponse.json();
                         console.log('Successfully authenticated with Spotify. User data:', userData);
@@ -165,6 +211,7 @@ class SpotifyManager {
                 } catch (error) {
                     console.error('Token validation failed:', error);
                 }
+
                 return data;
             } else {
                 console.error('Token request failed:', data);
@@ -175,6 +222,42 @@ class SpotifyManager {
             throw error;
         }
     }
+
+    async getUserPlaylists() {
+        try {
+            if (!this.accessToken) {
+                throw new Error('No access token found');
+            }
+    
+            let url = 'https://api.spotify.com/v1/me/playlists?limit=20'; // Get 20 playlists at a time
+            // TODO: use 'offset' in combination with 'limit' to create pages for super playlisters
+            //      -> can use a while(url) loop to keep fetching, handling pagination
+    
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            console.log('Fetched playlists:', data.items.map(playlist => ({
+                name: playlist.name,
+                id: playlist.id,
+                trackCount: playlist.tracks.total,
+                coverArt: playlist.images[0]?.url // Assuming the first image is the cover art
+            })));
+            
+            return data.items;
+        } catch (error) {
+            console.error('Error fetching playlists:', error);
+            throw error;
+        }
+    }    
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -209,8 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
             signInButton.hidden = true;
             selectPlaylistButton.hidden = false;
             insertLinkButton.hidden = false;
+            spotifyManager = new SpotifyManager();
         }
     }
-
-    
 });
