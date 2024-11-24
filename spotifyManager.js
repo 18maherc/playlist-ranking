@@ -1,6 +1,57 @@
 // spotifyManager.js
 let spotifyManager = null;
 
+let signInButton = null;
+let selectPlaylistButton = null;
+let insertLinkButton = null;
+
+// Function to reset the authentication state
+function resetAuthState() {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    localStorage.removeItem('code_verifier');
+    localStorage.removeItem('access_token');
+    spotifyManager = null; // Reset the spotifyManager instance
+    
+    // Reset UI elements
+    if (signInButton) signInButton.hidden = false;
+    if (selectPlaylistButton) selectPlaylistButton.hidden = true;
+    if (insertLinkButton) insertLinkButton.hidden = true;
+
+    setupEventListeners();
+}
+
+function setupEventListeners() {
+    signInButton = document.getElementById('signIn');
+    selectPlaylistButton = document.getElementById('selectPlaylist');
+    insertLinkButton = document.getElementById('insertLink');
+
+    if (signInButton) {
+        // Remove any existing listeners first
+        signInButton.replaceWith(signInButton.cloneNode(true));
+        signInButton = document.getElementById('signIn');
+        
+        signInButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            console.log('Sign in button clicked');
+            try {
+                console.log('Starting auth process');
+                resetAuthState();
+
+                if (!spotifyManager) {
+                    console.log('Creating new SpotifyManager');
+                    spotifyManager = new SpotifyManager();
+                    console.log('Calling initialize()');
+                    await spotifyManager.initialize();
+                }
+            } catch (error) {
+                console.log('Caught error in click handler:', error);
+                console.error('Sign in error:', error);
+                resetAuthState();
+            }
+        });
+    }
+}
+
 class SpotifyManager {
     constructor() {
         this.clientId = 'ce3914433ab04d3189ece1b95ca11ec5';
@@ -16,6 +67,13 @@ class SpotifyManager {
             // Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
+            const error = urlParams.get('error');
+
+            // If there's an error, clear it and throw
+            if (error) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                throw new Error(`Authorization error: ${error}`);
+            }
             
             if (code) {
                 window.history.replaceState({}, document.title, "/");
@@ -86,12 +144,27 @@ class SpotifyManager {
                     code_verifier: codeVerifier,
                 }),
             });
-
             const data = await response.json();
 
             if (response.ok) {
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.removeItem('code_verifier');
+
+                // Test the token immediately
+                try {
+                    const testResponse = await fetch('https://api.spotify.com/v1/me', {
+                        headers: {
+                            'Authorization': `Bearer ${data.access_token}`
+                        }
+                    });
+                    
+                    if (testResponse.ok) {
+                        const userData = await testResponse.json();
+                        console.log('Successfully authenticated with Spotify. User data:', userData);
+                    }
+                } catch (error) {
+                    console.error('Token validation failed:', error);
+                }
                 return data;
             } else {
                 console.error('Token request failed:', data);
@@ -105,7 +178,7 @@ class SpotifyManager {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const signInButton = document.getElementById('signIn');
+    setupEventListeners();
 
     // Check if we have an authorization code
     const urlParams = new URLSearchParams(window.location.search);
@@ -114,31 +187,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (error) {
         console.error('Authorization error:', error);
+        resetAuthState();
         return;
     }
 
     if (code) {
         spotifyManager = new SpotifyManager();
-        spotifyManager.initialize().then(() => {
+        spotifyManager.initialize().then(async () => {
             console.log('Authorization completed successfully');
+            signInButton.hidden = true;
+            selectPlaylistButton.hidden = false;
+            insertLinkButton.hidden = false;
         }).catch(error => {
             console.error('Authorization failed:', error);
-        });
-    }
-
-    if (signInButton) {
-        signInButton.addEventListener('click', async (event) => {
-            event.preventDefault();
-            try {
-                if (!spotifyManager) {
-                    spotifyManager = new SpotifyManager();
-                    await spotifyManager.initialize();
-                }
-            } catch (error) {
-                console.error('Sign in error:', error);
-            }
+            resetAuthState();
         });
     } else {
-        console.error('Sign-in button not found');
+        // Check if we're already authorized (returning/refreshing user)
+        const accessToken = localStorage.getItem('access_token');
+        if (accessToken) {
+            signInButton.hidden = true;
+            selectPlaylistButton.hidden = false;
+            insertLinkButton.hidden = false;
+        }
     }
+
+    
 });
