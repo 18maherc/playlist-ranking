@@ -32,19 +32,14 @@ function setupEventListeners() {
         
         signInButton.addEventListener('click', async (event) => {
             event.preventDefault();
-            console.log('Sign in button clicked');
             try {
-                console.log('Starting auth process');
                 resetAuthState();
 
                 if (!spotifyManager) {
-                    console.log('Creating new SpotifyManager');
                     spotifyManager = new SpotifyManager();
-                    console.log('Calling initialize()');
                     await spotifyManager.initialize();
                 }
             } catch (error) {
-                console.log('Caught error in click handler:', error);
                 console.error('Sign in error:', error);
                 resetAuthState();
             }
@@ -57,7 +52,6 @@ function setupEventListeners() {
         selectPlaylistButton = document.getElementById('selectPlaylist');
 
         selectPlaylistButton.addEventListener('click', async () => {
-            console.log("select playlist button clicked")
             if (spotifyManager) {
                 try {
                     playlists = await spotifyManager.getUserPlaylists();
@@ -101,11 +95,12 @@ class SpotifyManager {
     constructor() {
         this.clientId = 'ce3914433ab04d3189ece1b95ca11ec5';
         this.redirectUri = 'http://127.0.0.1:5500/index.html';
-        this.scope = 'user-read-private user-read-email playlist-read-private';
+        this.scope = 'user-read-private user-read-email playlist-read-private playlist-modify-private'; // TODO: figure out a cleaner way to list all the scopes
         this.codeVerifier = this.#generateRandomString(64);
         this.authUrl = new URL("https://accounts.spotify.com/authorize");
         this.tokenUrl = "https://accounts.spotify.com/api/token";
         this.accessToken = localStorage.getItem('access_token');
+        this.refreshToken = localStorage.getItem('refresh_token');
     }
 
     async initialize() {
@@ -195,6 +190,10 @@ class SpotifyManager {
             if (response.ok) {
                 this.accessToken = data.access_token;
                 localStorage.setItem('access_token', data.access_token);
+                if (data.refresh_token) {
+                    this.refreshToken = data.refresh_token;
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                }
                 localStorage.removeItem('code_verifier');
 
                 // Test the token immediately
@@ -223,6 +222,36 @@ class SpotifyManager {
         }
     }
 
+    async #refreshAccessToken() {
+        if (!this.refreshToken) {
+            throw new Error('No refresh token available');
+        }
+    
+        const response = await fetch(this.tokenUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                grant_type: 'refresh_token',
+                refresh_token: this.refreshToken,
+                client_id: this.clientId,
+            }),
+        });
+    
+        const data = await response.json();
+        if (response.ok) {
+            this.accessToken = data.access_token;
+            localStorage.setItem('access_token', data.access_token);
+            return data.access_token;
+        } else {
+            // If refresh fails, reset auth state
+            resetAuthState();
+            throw new Error('Failed to refresh token');
+        }
+    }
+    
+
     async getUserPlaylists() {
         try {
             if (!this.accessToken) {
@@ -232,14 +261,19 @@ class SpotifyManager {
             let url = 'https://api.spotify.com/v1/me/playlists?limit=20'; // Get 20 playlists at a time
             // TODO: use 'offset' in combination with 'limit' to create pages for super playlisters
             //      -> can use a while(url) loop to keep fetching, handling pagination
+            // TODO: can probably just drop this link into the response line below
     
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${this.accessToken}`
                 }
             });
-
-            if (!response.ok) {
+            
+            if (response.status === 401) {
+                console.log('Token expired, refreshing...');
+                await this.#refreshAccessToken();
+                return await this.getUserPlaylists(); // Retry the request
+            } else if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -255,6 +289,9 @@ class SpotifyManager {
             return data.items;
         } catch (error) {
             console.error('Error fetching playlists:', error);
+            if (error.message.includes('Failed to refresh token')) {
+                resetAuthState();
+            }
             throw error;
         }
     }    
@@ -277,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (code) {
         spotifyManager = new SpotifyManager();
         spotifyManager.initialize().then(async () => {
-            console.log('Authorization completed successfully');
             signInButton.hidden = true;
             selectPlaylistButton.hidden = false;
             insertLinkButton.hidden = false;
@@ -288,11 +324,15 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         // Check if we're already authorized (returning/refreshing user)
         const accessToken = localStorage.getItem('access_token');
-        if (accessToken) {
+        const refreshToken = localStorage.getItem('refresh_token');
+
+        if (accessToken && refreshToken) {
             signInButton.hidden = true;
             selectPlaylistButton.hidden = false;
             insertLinkButton.hidden = false;
             spotifyManager = new SpotifyManager();
+        } else {
+            resetAuthState();
         }
     }
 });
