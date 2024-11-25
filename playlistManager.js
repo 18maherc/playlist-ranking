@@ -53,6 +53,7 @@ function displayMatchup(matchup) {
     // Update the card contents
     try {
         // First card
+        const card1 = document.querySelector('.card1');
         const song1Title = document.querySelector('.song.song1 .title');
         const song1Artist = document.querySelector('.song.song1 .artist');
         const song1Album = document.querySelector('.song.song1 .album');
@@ -62,8 +63,14 @@ function displayMatchup(matchup) {
         if (song1Artist) song1Artist.textContent = song1.artist || 'Unknown Artist';
         if (song1Album) song1Album.textContent = song1.album || 'Unknown Album';
         if (song1Elo) song1Elo.textContent = song1.elo || 'Unknown ELO';
+        if (card1 && song1.art) {
+            card1.style.backgroundImage = `url(${song1.art})`;
+            card1.style.backgroundSize = 'cover';
+            card1.style.backgroundPosition = 'center';
+        }
 
         // Second card
+        const card2 = document.querySelector('.card2');
         const song2Title = document.querySelector('.song.song2 .title');
         const song2Artist = document.querySelector('.song.song2 .artist');
         const song2Album = document.querySelector('.song.song2 .album');
@@ -73,6 +80,12 @@ function displayMatchup(matchup) {
         if (song2Artist) song2Artist.textContent = song2.artist || 'Unknown Artist';
         if (song2Album) song2Album.textContent = song2.album || 'Unknown Album';
         if (song2Elo) song2Elo.textContent = song2.elo || 'Unknown ELO';
+        if (card2 && song2.art) {
+            card2.style.backgroundImage = `url(${song2.art})`;
+            card2.style.backgroundSize = 'cover';
+            card2.style.backgroundPosition = 'center';
+        }
+        // TODO: fix the background image styling stuff
 
         // Update the game manager with the current matchup
         if(gameManager){
@@ -111,28 +124,23 @@ class PlaylistManager {
         }
     
         // Get first random song
-        let index1 = Math.random() * songTitles.length | 0;
-        let song1 = {
-            title: songTitles[index1],
-            artist: 0,
-            album: 0,
-            elo: this.records[songTitles[index1]],
-            art: 0
-        };
+        const song1Title = songTitles[Math.random() * songTitles.length | 0];
         
         // Get second random song by picking from remaining songs
-        let remainingIndices = [...Array(songTitles.length).keys()]
-            .filter(i => i !== index1);
-        let randomIndex = Math.random() * remainingIndices.length | 0;
-        let song2 = {
-            title: songTitles[remainingIndices[randomIndex]],
-            artist: 0,
-            album: 0,
-            elo: this.records[songTitles[remainingIndices[randomIndex]]],
-            art: 0
-        };
+        const remainingSongs = songTitles.filter(song => song !== song1Title);
+        const song2Title = remainingSongs[Math.random() * remainingSongs.length | 0];
 
-        console.log('Matchup:', [song1, song2])
+        const song1 = {
+            ...this.trackInfo[song1Title],
+            elo: this.records[song1Title]
+        };
+        
+        const song2 = {
+            ...this.trackInfo[song2Title],
+            elo: this.records[song2Title]
+        };
+    
+        console.log('Matchup:', [song1, song2]);
         
         return [song1, song2];
     }
@@ -172,7 +180,7 @@ class PlaylistManager {
 
     exportJSON() {
         // TODO: sort the JSON based on ELO??
-        
+
         // Create the export object containing records and completed matchups
         const exportData = {
             Records: this.records,
@@ -201,6 +209,29 @@ class PlaylistManager {
         // Clean up by revoking the URL
         URL.revokeObjectURL(url);
     }
+
+    configurePlaylist(playlistItems) {
+        // Initialize or reset the records and completedMatchups
+        this.records = {};
+        this.completedMatchups = {};
+        this.trackInfo = {};
+    
+        // Process each track from the playlist
+        playlistItems.forEach(item => {
+            const trackInfo = {
+                title: item.track.name,
+                artist: item.track.artists[0].name,
+                album: item.track.album.name,
+                art: item.track.album.images[0]?.url || null,
+                id: item.track.id
+            };
+
+            this.trackInfo[trackInfo.title] = trackInfo;
+            this.records[trackInfo.title] = 1200;
+        });
+        console.log('Playlist configured:', this.records);
+    }
+    
 }
 
 document.addEventListener('DOMContentLoaded', () => {

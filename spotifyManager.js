@@ -78,22 +78,27 @@ function setupEventListeners() {
                     });
 
                     // Add change event listener to handle selection
-                    playlistSelect.addEventListener('change', (event) => {
+                    playlistSelect.addEventListener('change', async (event) => {
                         const selectedPlaylistId = event.target.value;
                         const selectedPlaylist = playlists.find(p => p.id === selectedPlaylistId);
                         
                         if (selectedPlaylist) {
                             console.log('Selected playlist:', selectedPlaylist);
-                            // Handle the selection here
-                            // For example:
-                            playlist = spotifyManager.getPlaylistItems(selectedPlaylistId);
-                            if(currentPlaylistManager){
-                                //currentPlaylistManager.configurePlaylist(playlist);
-                            }
-                            
-                            // Show the insert link button or other UI elements
-                            if (insertLinkButton) {
-                                insertLinkButton.hidden = false;
+                            try {
+                                const playlistItems = await spotifyManager.getPlaylistItems(selectedPlaylistId);
+
+                                if (!currentPlaylistManager) {
+                                    currentPlaylistManager = new PlaylistManager();
+                                }
+                                currentPlaylistManager.configurePlaylist(playlistItems);
+                                startMatchups();
+                                
+                                // Show the insert link button or other UI elements
+                                if (insertLinkButton) {
+                                    insertLinkButton.hidden = true;
+                                }
+                            } catch (error) {
+                                console.error('Error configuring playlist:', error);
                             }
                         }
                     });
@@ -104,8 +109,6 @@ function setupEventListeners() {
                         container.innerHTML = ''; // Clear any existing content
                         container.appendChild(playlistSelect);
                     }
-                    // TODO: add default option
-                    // TODO: handle a selection ("change") being made
 
                     // Hide other content
                     signInButton.hidden = true;
@@ -372,21 +375,14 @@ class SpotifyManager {
                 
                 // Update URL for next batch, will be null when no more items
                 url = data.next;
-
-                // Optional: Log progress
-                console.log(`Fetched ${allItems.length} tracks of ${data.total}`);
             }
 
-            // Clean it up for easier use anywhere else
-            allItems = allItems.map(item => ({
+            // Log a simplified version for debugging but return full items
+            console.log('Fetched all playlist items:', allItems.map(item => ({
                 name: item.track.name,
                 artist: item.track.artists[0].name,
-                album: item.track.album.name,
-                art: item.track.album.images[0].url,
-                id: item.track.id,
-            }))
-            
-            console.log('Fetched all playlist items:', allItems);
+                id: item.track.id
+            })));
             
             return allItems;
         } catch (error) {
