@@ -171,6 +171,8 @@ class PlaylistManager {
     }
 
     exportJSON() {
+        // TODO: sort the JSON based on ELO??
+        
         // Create the export object containing records and completed matchups
         const exportData = {
             Records: this.records,

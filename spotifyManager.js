@@ -57,14 +57,45 @@ function setupEventListeners() {
                     playlists = await spotifyManager.getUserPlaylists();
 
                     // Create a dropdown with the playlists
+                    // TODO: have this created somewhere else and show/hide it instead of making it on-the-fly
                     const playlistSelect = document.createElement('select');
                     playlistSelect.id = 'playlist-select';
+
+                    // Add default option that can't be selected
+                    const defaultOption = document.createElement('option');
+                    defaultOption.textContent = 'Choose a playlist';
+                    defaultOption.value = '';
+                    defaultOption.selected = true;
+                    defaultOption.disabled = true; // Makes it unselectable
+                    defaultOption.style.display = 'none'; // Hides it from dropdown list
+                    playlistSelect.appendChild(defaultOption);
                     
                     playlists.forEach(playlist => {
                         const option = document.createElement('option');
                         option.value = playlist.id;
                         option.textContent = `${playlist.name} (${playlist.tracks.total} tracks)`;
                         playlistSelect.appendChild(option);
+                    });
+
+                    // Add change event listener to handle selection
+                    playlistSelect.addEventListener('change', (event) => {
+                        const selectedPlaylistId = event.target.value;
+                        const selectedPlaylist = playlists.find(p => p.id === selectedPlaylistId);
+                        
+                        if (selectedPlaylist) {
+                            console.log('Selected playlist:', selectedPlaylist);
+                            // Handle the selection here
+                            // For example:
+                            playlist = spotifyManager.getPlaylistItems(selectedPlaylistId);
+                            if(currentPlaylistManager){
+                                //currentPlaylistManager.configurePlaylist(playlist);
+                            }
+                            
+                            // Show the insert link button or other UI elements
+                            if (insertLinkButton) {
+                                insertLinkButton.hidden = false;
+                            }
+                        }
                     });
 
                     // Add the dropdown to the page
@@ -250,13 +281,38 @@ class SpotifyManager {
             throw new Error('Failed to refresh token');
         }
     }
+
+    async #checkToken(){
+        if (!this.accessToken) {
+            throw new Error('No access token found');
+        } else {
+            // Test the token with a lightweight API call
+            try {
+                const response = await fetch('https://api.spotify.com/v1/me', {
+                    headers: {
+                        'Authorization': `Bearer ${this.accessToken}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    console.log('Token expired, refreshing...');
+                    await this.#refreshAccessToken();
+                } else if (!response.ok) {
+                    throw new Error(`Token validation failed with status: ${response.status}`);
+                }
+            } catch (error) {
+                if (error.message.includes('Failed to refresh token')) {
+                    resetAuthState();
+                }
+                throw error;
+            }
+        }
+    }
     
 
     async getUserPlaylists() {
         try {
-            if (!this.accessToken) {
-                throw new Error('No access token found');
-            }
+            await this.#checkToken();
     
             let url = 'https://api.spotify.com/v1/me/playlists?limit=20'; // Get 20 playlists at a time
             // TODO: use 'offset' in combination with 'limit' to create pages for super playlisters
@@ -269,11 +325,7 @@ class SpotifyManager {
                 }
             });
             
-            if (response.status === 401) {
-                console.log('Token expired, refreshing...');
-                await this.#refreshAccessToken();
-                return await this.getUserPlaylists(); // Retry the request
-            } else if (!response.ok) {
+            if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -289,12 +341,59 @@ class SpotifyManager {
             return data.items;
         } catch (error) {
             console.error('Error fetching playlists:', error);
-            if (error.message.includes('Failed to refresh token')) {
-                resetAuthState();
-            }
             throw error;
         }
-    }    
+    }
+
+    async getPlaylistItems(playlistID) {
+        try {
+            await this.#checkToken();
+    
+            let allItems = [];
+            let url = `https://api.spotify.com/v1/playlists/${playlistID}/tracks?limit=50`;
+
+            // Keep fetching while we have a next URL
+            // TODO: have a loading indicator, progress bar, or total count status
+            while (url) {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${this.accessToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Add this batch of items to our array
+                allItems = [...allItems, ...data.items];
+                
+                // Update URL for next batch, will be null when no more items
+                url = data.next;
+
+                // Optional: Log progress
+                console.log(`Fetched ${allItems.length} tracks of ${data.total}`);
+            }
+
+            // Clean it up for easier use anywhere else
+            allItems = allItems.map(item => ({
+                name: item.track.name,
+                artist: item.track.artists[0].name,
+                album: item.track.album.name,
+                art: item.track.album.images[0].url,
+                id: item.track.id,
+            }))
+            
+            console.log('Fetched all playlist items:', allItems);
+            
+            return allItems;
+        } catch (error) {
+            console.error('Error fetching playlist items:', error);
+            throw error;
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
