@@ -333,15 +333,33 @@ class SpotifyManager {
             }
 
             const data = await response.json();
+
+            console.log(data)
+
+            // Separate valid and invalid playlists
+            const faultyPlaylists = [];
+            const validPlaylists = data.items.filter(playlist => {
+                if (!playlist || !playlist.name || !playlist.id) {
+                    faultyPlaylists.push(playlist);
+                    return false;
+                }
+                return true;
+            });
+
+            // Log information about faulty playlists
+            if (faultyPlaylists.length > 0) {
+                console.warn(`Found ${faultyPlaylists.length} invalid playlist(s):`, faultyPlaylists);
+            }
+
+            console.log('Fetched playlists:', validPlaylists.map(playlist => ({
+                    name: playlist.name || 'Unnamed Playlist',
+                    id: playlist.id,
+                    trackCount: playlist.tracks?.total || 0,
+                    coverArt: playlist.images?.[0]?.url // Assuming the first image is the cover art
+                }))
+            );
             
-            console.log('Fetched playlists:', data.items.map(playlist => ({
-                name: playlist.name,
-                id: playlist.id,
-                trackCount: playlist.tracks.total,
-                coverArt: playlist.images[0]?.url // Assuming the first image is the cover art
-            })));
-            
-            return data.items;
+            return validPlaylists;
         } catch (error) {
             console.error('Error fetching playlists:', error);
             throw error;
