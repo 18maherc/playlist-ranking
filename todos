@@ -8,3 +8,11 @@ IDEA: Each song contains the following structure { "songname": "name", "artist":
 
 When ranking, compute a random number Pr(song gets picked to be a competitor) propto inv/matches played so songs that
 have fought less will be ranked more often then ELOs will eventually stabilize
+
+purge old files
+
+set up README.md -> lay out description, requirements for dev+test locally, rebase+PR on remote, etc.
+
+improve defaults for page visuals and button actions/responses
+
+think of better refactor structure for functions vs classes vs event handlers??

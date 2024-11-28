@@ -334,8 +334,6 @@ class SpotifyManager {
 
             const data = await response.json();
 
-            console.log(data)
-
             // Separate valid and invalid playlists
             const faultyPlaylists = [];
             const validPlaylists = data.items.filter(playlist => {

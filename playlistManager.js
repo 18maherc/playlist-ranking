@@ -48,12 +48,12 @@ function displayMatchup(matchup) {
 
     const [song1, song2] = matchup;
     console.log('Displaying songs:', song1, song2); // Check songs being displayed
-
     
     // Update the card contents
     try {
         // First card
         const card1 = document.querySelector('.card1');
+        const card1Song = document.querySelector('.card1 > .song');
         const song1Title = document.querySelector('.song.song1 .title');
         const song1Artist = document.querySelector('.song.song1 .artist');
         const song1Album = document.querySelector('.song.song1 .album');
@@ -63,14 +63,17 @@ function displayMatchup(matchup) {
         if (song1Artist) song1Artist.textContent = song1.artist || 'Unknown Artist';
         if (song1Album) song1Album.textContent = song1.album || 'Unknown Album';
         if (song1Elo) song1Elo.textContent = song1.elo || 'Unknown ELO';
+        // Add card1 art
         if (card1 && song1.art) {
-            card1.style.backgroundImage = `url(${song1.art})`;
-            card1.style.backgroundSize = 'cover';
-            card1.style.backgroundPosition = 'center';
+            card1Song.style.backgroundImage = `url(${song1.art})`;
+            card1Song.style.backgroundSize = 'cover';
+            card1Song.style.backgroundPosition = 'center';
+            card1Song.style.transition = 'background-image 0.5s ease-in-out';
         }
 
         // Second card
         const card2 = document.querySelector('.card2');
+        const card2Song = document.querySelector('.card2 > .song');
         const song2Title = document.querySelector('.song.song2 .title');
         const song2Artist = document.querySelector('.song.song2 .artist');
         const song2Album = document.querySelector('.song.song2 .album');
@@ -81,9 +84,10 @@ function displayMatchup(matchup) {
         if (song2Album) song2Album.textContent = song2.album || 'Unknown Album';
         if (song2Elo) song2Elo.textContent = song2.elo || 'Unknown ELO';
         if (card2 && song2.art) {
-            card2.style.backgroundImage = `url(${song2.art})`;
-            card2.style.backgroundSize = 'cover';
-            card2.style.backgroundPosition = 'center';
+            card2Song.style.backgroundImage = `url(${song2.art})`;
+            card2Song.style.backgroundSize = 'cover';
+            card2Song.style.backgroundPosition = 'center';
+            card2Song.style.transition = 'background-image 0.5s ease-in-out';
         }
         // TODO: fix the background image styling stuff
 
