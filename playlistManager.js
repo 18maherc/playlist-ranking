@@ -65,10 +65,7 @@ function displayMatchup(matchup) {
         if (song1Elo) song1Elo.textContent = song1.elo || 'Unknown ELO';
         // Add card1 art
         if (card1 && song1.art) {
-            card1Song.style.backgroundImage = `url(${song1.art})`;
-            card1Song.style.backgroundSize = 'cover';
-            card1Song.style.backgroundPosition = 'center';
-            card1Song.style.transition = 'background-image 0.5s ease-in-out';
+            card1Song.style.setProperty('--bg-image', `url(${song1.art})`);
         }
 
         // Second card
@@ -84,11 +81,8 @@ function displayMatchup(matchup) {
         if (song2Album) song2Album.textContent = song2.album || 'Unknown Album';
         if (song2Elo) song2Elo.textContent = song2.elo || 'Unknown ELO';
         if (card2 && song2.art) {
-            card2Song.style.backgroundImage = `url(${song2.art})`;
-            card2Song.style.backgroundSize = 'cover';
-            card2Song.style.backgroundPosition = 'center';
-            card2Song.style.transition = 'background-image 0.5s ease-in-out';
-        }
+            card2Song.style.setProperty('--bg-image', `url(${song2.art})`);
+        }//
         // TODO: fix the background image styling stuff
 
         // Update the game manager with the current matchup
