@@ -126,6 +126,10 @@ class PlaylistManager {
         if (songTitles.length < 2) {
             throw new Error('Not enough songs for a matchup');
         }
+
+        // TODO: implement a better algorithm than random
+        //      - slightly favor selecting higher ranked songs to get more exposure
+        //      - slightly favor closer matchups
     
         // Get first random song
         const song1Title = songTitles[Math.random() * songTitles.length | 0];
@@ -134,15 +138,8 @@ class PlaylistManager {
         const remainingSongs = songTitles.filter(song => song !== song1Title);
         const song2Title = remainingSongs[Math.random() * remainingSongs.length | 0];
 
-        const song1 = {
-            ...this.trackInfo[song1Title],
-            elo: this.records[song1Title]
-        };
-        
-        const song2 = {
-            ...this.trackInfo[song2Title],
-            elo: this.records[song2Title]
-        };
+        const song1 = this.records[song1Title];
+        const song2 = this.records[song2Title];
     
         console.log('Matchup:', [song1, song2]);
         
@@ -157,12 +154,16 @@ class PlaylistManager {
         const { winner, loser, newElos } = result;
 
         // Update the records with new ELO ratings
-        this.records[winner.title] = Math.round(newElos.winner);
-        this.records[loser.title] = Math.round(newElos.loser);
+        this.records[winner.title].elo = Math.round(newElos.winner);
+        this.records[loser.title].elo = Math.round(newElos.loser);
+
+        // TODO: sort ELO records high to low
 
         // Store the completed matchup result
         const matchupKey = this.#sortedMatchup(matchup);
         this.completedMatchups[matchupKey] = winner.title;
+
+        // TODO: autosave to cookies
 
         console.log(`Updated ELO ratings:
             ${winner.title}: ${newElos.winner}
@@ -218,7 +219,6 @@ class PlaylistManager {
         // Initialize or reset the records and completedMatchups
         this.records = {};
         this.completedMatchups = {};
-        this.trackInfo = {};
     
         // Process each track from the playlist
         playlistItems.forEach(item => {
@@ -227,11 +227,11 @@ class PlaylistManager {
                 artist: item.track.artists[0].name,
                 album: item.track.album.name,
                 art: item.track.album.images[0]?.url || null,
-                id: item.track.id
+                id: item.track.id,
+                elo: item.elo || 1200,
             };
 
-            this.trackInfo[trackInfo.title] = trackInfo;
-            this.records[trackInfo.title] = 1200;
+            this.records[trackInfo.title] = trackInfo;
         });
         console.log('Playlist configured:', this.records);
     }
