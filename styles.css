@@ -192,6 +192,15 @@ article > .card > p {
 	font-style: italic;
 }
 
+.song-player {
+    border: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    max-height: 80px;
+}
+
+
 /* ===== Footer configuration =============================================== */
 
 footer {

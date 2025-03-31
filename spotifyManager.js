@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check if we have an authorization code
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
+    const authCode = urlParams.get('code');
     const error = urlParams.get('error');
 
     if (error) {
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    if (code) {
+    if (authCode) {
         spotifyManager = new SpotifyManager();
         spotifyManager.initialize().then(async () => {
             signInButton.hidden = true;

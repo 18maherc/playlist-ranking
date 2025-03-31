@@ -46,6 +46,10 @@ function displayMatchup(matchup) {
         return;
     }
 
+    // Remove existing players at the start of displayMatchup()
+    const existingPlayers = document.querySelectorAll('.song-player');
+    existingPlayers.forEach(player => player.remove());
+
     const [song1, song2] = matchup;
     console.log('Displaying songs:', song1, song2); // Check songs being displayed
     
@@ -67,6 +71,29 @@ function displayMatchup(matchup) {
         if (card1 && song1.art) {
             card1Song.style.setProperty('--bg-image', `url(${song1.art})`);
         }
+        // Add a way to play the song
+        // TODO: handle case of Premium auth vs Client auth
+        //      - as of Nov 27, 2024, preview_url is deprecated
+        //          (https://developer.spotify.com/blog/2024-11-27-changes-to-the-web-api)
+        //      - this article mentions workarounds and potential new support in future: 
+        //          https://community.spotify.com/t5/Spotify-for-Developers/Missing-Preview-URL-using-Client-Credentials/m-p/6492694#M15470
+        //      - Alternatively, could design a custom player and use Web Playback SDK
+
+        // Create new iframe element
+        //      - need to do this dynamically to avoid a MutationObserver error on the iframe
+        const song1Player = document.createElement('iframe');
+        // Set all attributes before adding to DOM
+        song1Player.className = 'song-player';
+        song1Player.src = `https://open.spotify.com/embed/track/${song1.id}?utm_source=generator&theme=0&hide_cover=1&view=minimal`;
+        song1Player.width = '100%';
+        song1Player.height = '80'; // Smaller fixed height
+        song1Player.style = 'border-radius:12px; max-height:80px;';
+        song1Player.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+        song1Player.loading = 'lazy';
+        // Add the new iframe to the DOM
+        if (card1) {
+            card1.appendChild(song1Player);
+        }
 
         // Second card
         const card2 = document.querySelector('.card2');
@@ -82,8 +109,20 @@ function displayMatchup(matchup) {
         if (song2Elo) song2Elo.textContent = song2.elo || 'Unknown ELO';
         if (card2 && song2.art) {
             card2Song.style.setProperty('--bg-image', `url(${song2.art})`);
-        }//
-        // TODO: fix the background image styling stuff
+        }
+        // Create new iframe element
+        const song2Player = document.createElement('iframe');
+        // Set all attributes before adding to DOM
+        song2Player.className = 'song-player';
+        song2Player.src = `https://open.spotify.com/embed/track/${song2.id}?utm_source=generator&theme=0&hide_cover=1&view=minimal`;
+        song2Player.width = '100%';
+        song2Player.height = '80'; // Smaller fixed height
+        song2Player.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+        song2Player.loading = 'lazy';
+        // Add the new iframe to the DOM
+        if (card2) {
+            card2.appendChild(song2Player);
+        }
 
         // Update the game manager with the current matchup
         if(gameManager){
