@@ -128,7 +128,10 @@ function setupEventListeners() {
 class SpotifyManager {
     constructor() {
         this.clientId = 'ce3914433ab04d3189ece1b95ca11ec5';
-        this.redirectUri = 'http://127.0.0.1:5500/index.html';
+        this.redirectUri = window.location.hostname === '127.0.0.1' || 
+                           window.location.hostname === 'localhost' 
+                           ? 'http://127.0.0.1:5500/index.html' 
+                           : 'https://18maherc.github.io/playlist-ranking/';
         this.scope = 'user-read-private user-read-email playlist-read-private playlist-modify-private'; // TODO: figure out a cleaner way to list all the scopes
         this.codeVerifier = this.#generateRandomString(64);
         this.authUrl = new URL("https://accounts.spotify.com/authorize");
