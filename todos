@@ -16,3 +16,5 @@ set up README.md -> lay out description, requirements for dev+test locally, reba
 improve defaults for page visuals and button actions/responses
 
 think of better refactor structure for functions vs classes vs event handlers??
+
+How to track versioning in repo and README
