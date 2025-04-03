@@ -156,6 +156,27 @@ class PlaylistManager {
         console.log('Playlist uploaded:', this.records);
     }
 
+    configurePlaylist(playlistItems) {
+        // Initialize or reset the records
+        this.records = {};
+    
+        // Process each track from the playlist
+        playlistItems.forEach(item => {
+            const trackInfo = {
+                title: item.track.name,
+                artist: item.track.artists[0].name,
+                album: item.track.album.name,
+                art: item.track.album.images[0]?.url || null,
+                id: item.track.id,
+                elo: item.elo || 1200,
+                matches_played: item.matches_played || 0,
+            };
+
+            this.records[trackInfo.title] = trackInfo;
+        });
+        console.log('Playlist configured:', this.records);
+    }
+
     getMatchup() {
         const songTitles = Object.keys(this.records);
         
@@ -249,28 +270,6 @@ class PlaylistManager {
         // Clean up by revoking the URL
         URL.revokeObjectURL(url);
     }
-
-    configurePlaylist(playlistItems) {
-        // Initialize or reset the records and completedMatchups
-        this.records = {};
-        this.completedMatchups = {};
-    
-        // Process each track from the playlist
-        playlistItems.forEach(item => {
-            const trackInfo = {
-                title: item.track.name,
-                artist: item.track.artists[0].name,
-                album: item.track.album.name,
-                art: item.track.album.images[0]?.url || null,
-                id: item.track.id,
-                elo: item.elo || 1200,
-            };
-
-            this.records[trackInfo.title] = trackInfo;
-        });
-        console.log('Playlist configured:', this.records);
-    }
-    
 }
 
 document.addEventListener('DOMContentLoaded', () => {
