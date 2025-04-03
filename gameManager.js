@@ -3,9 +3,6 @@ let gameManager = null;
 
 function songSelection(selection) {
     if (currentPlaylistManager) {
-        // Get current matchup
-        const currentMatchup = gameManager.getCurrentMatchup();
-
         const result = gameManager.calculateWinner(selection);
         if (!result) {
             console.error('Failed to calculate winner');
@@ -13,7 +10,7 @@ function songSelection(selection) {
         }
 
         // Record the winner
-        currentPlaylistManager.completeMatchup(currentMatchup, result);
+        currentPlaylistManager.completeMatchup(result);
         
         // Get and display next matchup
         const nextMatchup = currentPlaylistManager.getMatchup();
@@ -24,6 +21,8 @@ function songSelection(selection) {
 class GameManager {
     constructor() {
         this.currentMatchup = [null, null];
+        this.currentMainSong = null;
+        this.currentMatchupQueue = [];
         this.K = 32; // ELO constant
     }
 

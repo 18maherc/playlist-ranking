@@ -139,16 +139,19 @@ function displayMatchup(matchup) {
 class PlaylistManager {
     constructor() {
         this.records = {};
-        this.completedMatchups = {};
     }
 
     uploadPlaylist(jsonData){
         // TODO: add schema validation??
-        if(jsonData.Records){
-            this.records = jsonData.Records;
-        }
-        if(jsonData.CompletedMatchups){
-            this.completedMatchups = jsonData.CompletedMatchups;
+        if(jsonData.Records) {
+            // Process each record and ensure default values exist
+            Object.entries(jsonData.Records).forEach(([title, record]) => {
+                this.records[title] = {
+                    ...record,
+                    elo: record.elo || 1200,  // Default ELO if not present
+                    matches_played: record.matches_played || 0  // Default matches if not present
+                };
+            });
         }
         console.log('Playlist uploaded:', this.records);
     }
@@ -160,30 +163,43 @@ class PlaylistManager {
             throw new Error('Not enough songs for a matchup');
         }
 
+        if (!gameManager) {
+            throw new Error('Game manager not initialized');
+        }
+
         // TODO: implement a better algorithm than random
         //      - slightly favor selecting higher ranked songs to get more exposure
         //      - slightly favor closer matchups
     
-        // Get first random song
-        const song1Title = songTitles[Math.random() * songTitles.length | 0];
-        
-        // Get second random song by picking from remaining songs
-        const remainingSongs = songTitles.filter(song => song !== song1Title);
-        const song2Title = remainingSongs[Math.random() * remainingSongs.length | 0];
+        if (gameManager.currentMatchupQueue.length === 0) {
+            // Pick a new song to rate
+            // Get first random song
+            const song1Title = songTitles[Math.random() * songTitles.length | 0];
+            gameManager.currentMainSong = this.records[song1Title];
 
-        const song1 = this.records[song1Title];
-        const song2 = this.records[song2Title];
-    
-        console.log('Matchup:', [song1, song2]);
+            // Fill up the queue
+            if (this.records[song1Title].matches_played < songTitles.length / 10 ) {
+                // Try to front load the most underplayed songs to get more ELO movement
+                for (let i = 0; i < songTitles.length * 0.05; i++){
+                    const remainingSongs = songTitles.filter(song => 
+                        song !== song1Title && !gameManager.currentMatchupQueue.includes(song));
+                    const nextOpponent = remainingSongs[Math.random() * remainingSongs.length | 0];
+                    gameManager.currentMatchupQueue.push(this.records[nextOpponent]);
+                }
+            } else {
+                // Get second random song by picking from remaining songs
+                const remainingSongs = songTitles.filter(song => song !== song1Title);
+                const nextOpponent = remainingSongs[Math.random() * remainingSongs.length | 0];
+                gameManager.currentMatchupQueue.push(this.records[nextOpponent]);
+            }
+        }
+
+        console.log('Matchup:', [gameManager.currentMainSong, gameManager.currentMatchupQueue[-1]]);
         
-        return [song1, song2];
+        return [gameManager.currentMainSong, gameManager.currentMatchupQueue.pop()];
     }
 
-    checkMatchupCompleted(matchup) {
-        return this.#sortedMatchup(matchup) in this.completedMatchups;
-    }
-
-    completeMatchup(matchup, result) {
+    completeMatchup(result) {
         const { winner, loser, newElos } = result;
 
         // Update the records with new ELO ratings
@@ -193,8 +209,8 @@ class PlaylistManager {
         // TODO: sort ELO records high to low
 
         // Store the completed matchup result
-        const matchupKey = this.#sortedMatchup(matchup);
-        this.completedMatchups[matchupKey] = winner.title;
+        this.records[winner.title].matches_played++;
+        this.records[loser.title].matches_played++;
 
         // TODO: autosave to cookies
 
@@ -203,26 +219,12 @@ class PlaylistManager {
             ${loser.title}: ${newElos.loser}`);
     }
 
-    #sortedMatchup(matchup) {
-        if (!matchup || matchup.length !== 2) {
-            console.error('Invalid matchup for sorting:', matchup);
-            return null;
-        }
-    
-        // Sort the titles alphabetically to ensure consistent ordering
-        const titles = [matchup[0].title, matchup[1].title].sort();
-        
-        // Create a consistent matchup string format
-        return `${titles[0]} vs ${titles[1]}`;
-    }
-
     exportJSON() {
         // TODO: sort the JSON based on ELO??
 
         // Create the export object containing records and completed matchups
         const exportData = {
             Records: this.records,
-            CompletedMatchups: this.completedMatchups
         };
     
         // Convert the data to a JSON string
