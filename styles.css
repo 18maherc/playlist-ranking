@@ -39,6 +39,72 @@ html {
 	font-weight: 2rem;
 }
 
+/* ===== Expandable Sidebar ================================================= */
+
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 4rem;
+	background-color: var(--bg-dark);
+	border-right: 0.125rem solid var(--bg-light);
+	transition: width var(--transition-time) ease;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	padding: 1.25rem 0;
+	gap: 0.625rem;
+}
+
+.sidebar:hover {
+	width: 12.5rem;
+}
+
+.sidebar-item {
+	display: flex;
+	align-items: center;
+	padding: 0.9375rem 1.25rem;
+	cursor: pointer;
+	transition: background-color var(--transition-time) ease;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.sidebar-item:hover {
+	background-color: var(--bg-light);
+}
+
+.sidebar-item .icon {
+	font-size: 1.25rem;
+	min-width: 1.25rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.sidebar-item .text {
+	margin-left: 0.9375rem;
+	font-size: 1rem;
+	color: white;
+	opacity: 0;
+	transition: opacity var(--transition-time) ease;
+}
+
+.sidebar:hover .sidebar-item .text {
+	opacity: 1;
+}
+
+.sidebar-item .icon img {
+	width: 1.25rem;
+	height: 1.25rem;
+	filter: brightness(0) saturate(100%) invert(54%) sepia(99%) saturate(421%) hue-rotate(88deg) brightness(104%) contrast(82%);
+}
+
+.sidebar-item[hidden] {
+	display: none;
+}
+
 /* ===== Overall settings =================================================== */
 
 body {
@@ -57,6 +123,8 @@ body {
 	justify-content: center;
 
 	gap: 1em;
+	margin-left: 4rem;
+	transition: margin-left var(--transition-time) ease;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

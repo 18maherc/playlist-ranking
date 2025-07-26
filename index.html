@@ -14,6 +14,22 @@
 		<script type="text/javascript" src="spotifyManager.js"></script>
 	</head>
 	<body>
+		<!-- Expandable Sidebar -->
+		<nav class="sidebar">
+			<div class="sidebar-item" id="signIn">
+				<span class="icon"><img src="svg/spotify.svg" alt="Spotify" /></span>
+				<span class="text">Sign in</span>
+			</div>
+			<div class="sidebar-item" id="uploadJSON">
+				<span class="icon">📤</span>
+				<span class="text">Upload Data</span>
+			</div>
+			<div class="sidebar-item" id="exportJSON">
+				<span class="icon">📥</span>
+				<span class="text">Export Data</span>
+			</div>
+		</nav>
+
 		<header>
 			<h1>Spotify Playlist Ranker</h1>
 			<p>
@@ -52,18 +68,9 @@
 		<!-- TODO: add a way to play songs -->
 		<!--    -if user is an authed Premium user, they can play the whole song, else use the 30 second 'preview_url' -->
 
-		<div class="file-btns">
-			<!-- TODO: have a 'Continue' button that resumes the game based on a localStorage cached instance of the json export -->
-			<button id="uploadJSON">Upload song data</button>
-			<button id="exportJSON">Export song data</button>
-		</div>
-
 		<div class="spotify-btns">
-			<button id="signIn">
-				<img src="svg/spotify.svg" />
-				<!-- TODO: style the logo here -->
-				<span>Sign in</span>
-			</button>
+			<!-- TODO: add these "buttons to the sidebar-->
+			<!--  -> This button should pull up a grid menu overlay that has all the playlist covers, with the playlist name shown on mouse when hovering-->
 			<button id="selectPlaylist" hidden="true">Select playlist</button>
 			<button id="insertLink" hidden="true">Insert playlist link</button>
 		</div>

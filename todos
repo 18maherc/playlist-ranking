@@ -18,3 +18,5 @@ improve defaults for page visuals and button actions/responses
 think of better refactor structure for functions vs classes vs event handlers??
 
 How to track versioning in repo and README
+
+TODO: have a 'Continue' button that resumes the game based on a localStorage cached instance of the json export
