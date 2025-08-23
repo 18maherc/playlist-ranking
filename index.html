@@ -12,6 +12,7 @@
 		<script type="text/javascript" src="playlistManager.js"></script>
 		<script type="text/javascript" src="gameManager.js"></script>
 		<script type="text/javascript" src="spotifyManager.js"></script>
+		<script type="text/javascript" src="modalManager.js"></script>
 	</head>
 	<body>
 		<!-- Expandable Sidebar -->
@@ -27,6 +28,10 @@
 			<div class="sidebar-item" id="exportJSON">
 				<span class="icon">📥</span>
 				<span class="text">Export Data</span>
+			</div>
+			<div class="sidebar-item" id="selectPlaylist">
+				<span class="icon">🎶</span>
+				<span class="text">Select User Playlist</span>
 			</div>
 		</nav>
 
@@ -70,12 +75,21 @@
 
 		<div class="spotify-btns">
 			<!-- TODO: add these "buttons to the sidebar-->
-			<!--  -> This button should pull up a grid menu overlay that has all the playlist covers, with the playlist name shown on mouse when hovering-->
-			<button id="selectPlaylist" hidden="true">Select playlist</button>
 			<button id="insertLink" hidden="true">Insert playlist link</button>
 		</div>
 
-		<div id="playlist-container"></div>
+		<!-- Pop-up Modal -->
+		<div id="modal-overlay" class="modal-overlay" hidden>
+			<div class="modal">
+				<div class="modal-header">
+					<h2>Modal Title</h2>
+					<button class="modal-close">&times;</button>
+				</div>
+				<div class="modal-content">
+					<p>Modal content goes here...</p>
+				</div>
+			</div>
+		</div>
 
 		<!-- TODO: <div class="ranking">Current (top 25) rankings of songs, as well as their ELOs, in a neat list</div>-->
 

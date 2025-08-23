@@ -56,63 +56,77 @@ function setupEventListeners() {
                 try {
                     playlists = await spotifyManager.getUserPlaylists();
 
-                    // Create a dropdown with the playlists
+                    // Create a 5x5 grid of playlist covers.
                     // TODO: have this created somewhere else and show/hide it instead of making it on-the-fly
-                    const playlistSelect = document.createElement('select');
-                    playlistSelect.id = 'playlist-select';
+                    const playlistGrid = document.createElement('div');
+                    playlistGrid.id = 'playlist-grid';
 
-                    // Add default option that can't be selected
-                    const defaultOption = document.createElement('option');
-                    defaultOption.textContent = 'Choose a playlist';
-                    defaultOption.value = '';
-                    defaultOption.selected = true;
-                    defaultOption.disabled = true; // Makes it unselectable
-                    defaultOption.style.display = 'none'; // Hides it from dropdown list
-                    playlistSelect.appendChild(defaultOption);
-                    
-                    playlists.forEach(playlist => {
-                        const option = document.createElement('option');
-                        option.value = playlist.id;
-                        option.textContent = `${playlist.name} (${playlist.tracks.total} tracks)`;
-                        playlistSelect.appendChild(option);
-                    });
-
-                    // Add change event listener to handle selection
-                    playlistSelect.addEventListener('change', async (event) => {
-                        const selectedPlaylistId = event.target.value;
-                        const selectedPlaylist = playlists.find(p => p.id === selectedPlaylistId);
+                    playlists.slice(0, 25).forEach(playlist => {
+                        const playlistItem = document.createElement('div');
+                        playlistItem.id = 'playlist-item';
+                        playlistItem.dataset.playlistId = playlist.id;
                         
-                        if (selectedPlaylist) {
-                            console.log('Selected playlist:', selectedPlaylist);
-                            try {
-                                const playlistItems = await spotifyManager.getPlaylistItems(selectedPlaylistId);
-
-                                if (!currentPlaylistManager) {
-                                    currentPlaylistManager = new PlaylistManager();
-                                }
-                                currentPlaylistManager.configurePlaylist(playlistItems);
-                                startMatchups();
-                                
-                                // Show the insert link button or other UI elements
-                                if (insertLinkButton) {
-                                    insertLinkButton.hidden = true;
-                                }
-                            } catch (error) {
-                                console.error('Error configuring playlist:', error);
-                            }
-                        }
+                        const img = document.createElement('img');
+                        img.src = playlist.images?.[0]?.url || 'svg/default-playlist.svg';
+                        img.alt = playlist.name;
+                        
+                        const tooltip = document.createElement('div');
+                        tooltip.id = 'playlist-tooltip';
+                        tooltip.textContent = `${playlist.name} (${playlist.tracks.total} tracks)`;
+                        
+                        playlistItem.appendChild(img);
+                        playlistItem.appendChild(tooltip);
+                        playlistGrid.appendChild(playlistItem);
                     });
 
-                    // Add the dropdown to the page
-                    const container = document.getElementById('playlist-container'); // Make sure you have this element in your HTML
-                    if (container) {
-                        container.innerHTML = ''; // Clear any existing content
-                        container.appendChild(playlistSelect);
-                    }
+                    // Add the modal to the page
+                    openModal("Select a playlist", playlistGrid.outerHTML);
+                    
+                    // Add click event listener after modal is opened
+                    setTimeout(() => {
+                        const modalPlaylistGrid = document.getElementById('playlist-grid');
+                        if (modalPlaylistGrid) {
+                            modalPlaylistGrid.addEventListener('click', async (event) => {
+                                const playlistItem = event.target.closest('#playlist-item');
+                                if (!playlistItem) return;
+                                
+                                const selectedPlaylistId = playlistItem.dataset.playlistId;
+                                const selectedPlaylist = playlists.find(p => p.id === selectedPlaylistId);
+                                
+                                if (selectedPlaylist) {
+                                    console.log('Selected playlist:', selectedPlaylist);
+                                    try {
+                                        const playlistItems = await spotifyManager.getPlaylistItems(selectedPlaylistId);
+
+                                        // Always create a new playlist manager for new selections
+                                        currentPlaylistManager = new PlaylistManager();
+                                        currentPlaylistManager.configurePlaylist(playlistItems);
+                                        
+                                        // Reset game manager state for new playlist
+                                        if (gameManager) {
+                                            gameManager.currentMatchupQueue = [];
+                                            gameManager.currentMainSong = null;
+                                        }
+                                        
+                                        startMatchups();
+                                        
+                                        // Show the insert link button or other UI elements
+                                        if (insertLinkButton) {
+                                            insertLinkButton.hidden = true;
+                                        }
+                                        
+                                        closeModal();
+                                    } catch (error) {
+                                        console.error('Error configuring playlist:', error);
+                                    }
+                                }
+                            });
+                        }
+                    }, 100);
 
                     // Hide other content
                     signInButton.hidden = true;
-                    selectPlaylistButton.hidden = true;
+                    // selectPlaylistButton.hidden = true;
                     insertLinkButton.hidden = true;
                 } catch (error) {
                     console.error('Error handling playlists:', error);
@@ -320,7 +334,7 @@ class SpotifyManager {
         try {
             await this.#checkToken();
     
-            let url = 'https://api.spotify.com/v1/me/playlists?limit=20'; // Get 20 playlists at a time
+            let url = 'https://api.spotify.com/v1/me/playlists?limit=25'; // Get 25 playlists at a time
             // TODO: use 'offset' in combination with 'limit' to create pages for super playlisters
             //      -> can use a while(url) loop to keep fetching, handling pagination
             // TODO: can probably just drop this link into the response line below

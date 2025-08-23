@@ -105,6 +105,123 @@ html {
 	display: none;
 }
 
+/* ===== Pop-up Modal ======================================================= */
+
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.7);
+	z-index: 2000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.modal {
+	background-color: var(--bg-dark);
+	border: 0.125rem solid var(--bg-light);
+	border-radius: 1rem;
+	width: 80vw;
+	max-width: 50rem;
+	max-height: 80vh;
+	overflow: hidden;
+	box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.5rem;
+	border-bottom: 0.125rem solid var(--bg-light);
+	background-color: var(--bg-light);
+}
+
+.modal-header h2 {
+	margin: 0;
+	color: white;
+	font-size: 1.5rem;
+}
+
+.modal-close {
+	background: none;
+	border: none;
+	color: white;
+	font-size: 2rem;
+	cursor: pointer;
+	padding: 0;
+	width: 2rem;
+	height: 2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.25rem;
+	transition: background-color var(--transition-time);
+}
+
+.modal-close:hover {
+	background-color: var(--bg-dark);
+}
+
+.modal-content {
+	padding: 1.5rem;
+	color: white;
+	max-height: 60vh;
+	overflow-y: auto;
+}
+
+.modal-overlay[hidden] {
+	display: none;
+}
+
+/* ===== Playlist Grid ====================================================== */
+
+#playlist-grid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 1rem;
+	padding: 1rem;
+}
+
+#playlist-item {
+	position: relative;
+	cursor: pointer;
+	border-radius: 0.5rem;
+	overflow: hidden;
+	transition: transform var(--transition-time);
+}
+
+#playlist-item:hover {
+	transform: scale(1.05);
+}
+
+#playlist-item img {
+	width: 100%;
+	aspect-ratio: 1;
+	object-fit: cover;
+	border-radius: 0.5rem;
+}
+
+#playlist-tooltip {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: rgba(0, 0, 0, 0.8);
+	color: white;
+	padding: 0.5rem;
+	font-size: 0.875rem;
+	transform: translateY(100%);
+	transition: transform var(--transition-time);
+}
+
+#playlist-item:hover #playlist-tooltip {
+	transform: translateY(0);
+}
+
 /* ===== Overall settings =================================================== */
 
 body {
