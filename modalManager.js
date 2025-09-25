@@ -15,6 +15,33 @@ function closeModal() {
     overlay.hidden = true;
 }
 
+function showError(message) {
+    let errorElement = document.getElementById('modal-error');
+    if (!errorElement) {
+        // Create error element if it doesn't exist
+        errorElement = document.createElement('div');
+        errorElement.id = 'modal-error';
+        errorElement.style.cssText = 'color: red; font-size: 0.875rem; margin-top: 0.5rem; display: none;';
+        
+        // Add to modal content
+        const modalContent = document.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.appendChild(errorElement);
+        }
+    }
+    
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+}
+
+function hideError() {
+    const errorElement = document.getElementById('modal-error');
+    if (errorElement) {
+        errorElement.style.display = 'none';
+    }
+}
+
+
 // Set up event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('modal-overlay');

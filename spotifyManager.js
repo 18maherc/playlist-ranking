@@ -20,6 +20,22 @@ function resetAuthState() {
     setupEventListeners();
 }
 
+async function startGameFromPlaylist(selectedPlaylistId) {
+    const playlistItems = await spotifyManager.getPlaylistItems(selectedPlaylistId);
+
+    // Always create a new playlist manager for new selections
+    currentPlaylistManager = new PlaylistManager();
+    currentPlaylistManager.configurePlaylist(playlistItems);
+    
+    // Reset game manager state for new playlist
+    if (gameManager) {
+        gameManager.currentMatchupQueue = [];
+        gameManager.currentMainSong = null;
+    }
+    
+    startMatchups();
+}
+
 function setupEventListeners() {
     signInButton = document.getElementById('signIn');
     selectPlaylistButton = document.getElementById('selectPlaylist');
@@ -54,13 +70,12 @@ function setupEventListeners() {
         selectPlaylistButton.addEventListener('click', async () => {
             if (spotifyManager) {
                 try {
-                    playlists = await spotifyManager.getUserPlaylists();
-
                     // Create a 5x5 grid of playlist covers.
                     // TODO: have this created somewhere else and show/hide it instead of making it on-the-fly
                     const playlistGrid = document.createElement('div');
                     playlistGrid.id = 'playlist-grid';
 
+                    playlists = await spotifyManager.getUserPlaylists();
                     playlists.slice(0, 25).forEach(playlist => {
                         const playlistItem = document.createElement('div');
                         playlistItem.id = 'playlist-item';
@@ -96,25 +111,7 @@ function setupEventListeners() {
                                 if (selectedPlaylist) {
                                     console.log('Selected playlist:', selectedPlaylist);
                                     try {
-                                        const playlistItems = await spotifyManager.getPlaylistItems(selectedPlaylistId);
-
-                                        // Always create a new playlist manager for new selections
-                                        currentPlaylistManager = new PlaylistManager();
-                                        currentPlaylistManager.configurePlaylist(playlistItems);
-                                        
-                                        // Reset game manager state for new playlist
-                                        if (gameManager) {
-                                            gameManager.currentMatchupQueue = [];
-                                            gameManager.currentMainSong = null;
-                                        }
-                                        
-                                        startMatchups();
-                                        
-                                        // Show the insert link button or other UI elements
-                                        if (insertLinkButton) {
-                                            insertLinkButton.hidden = true;
-                                        }
-                                        
+                                        startGameFromPlaylist(selectedPlaylistId);
                                         closeModal();
                                     } catch (error) {
                                         console.error('Error configuring playlist:', error);
@@ -127,7 +124,7 @@ function setupEventListeners() {
                     // Hide other content
                     signInButton.hidden = true;
                     // selectPlaylistButton.hidden = true;
-                    insertLinkButton.hidden = true;
+                    // insertLinkButton.hidden = true;
                 } catch (error) {
                     console.error('Error handling playlists:', error);
                     if (error.message.includes('No access token found')) {
@@ -136,6 +133,56 @@ function setupEventListeners() {
                 }
             }
         });
+    }
+
+    if (insertLinkButton) {
+        // Remove any existing listeners first
+        insertLinkButton.replaceWith(insertLinkButton.cloneNode(true));
+        insertLinkButton = document.getElementById('insertLink');
+
+        insertLinkButton.addEventListener('click', () => {
+            if (spotifyManager) {
+                const linkEntry = document.createElement('div');
+                linkEntry.id = 'link-entry';
+                
+                const linkTextBox = document.createElement('input');
+                linkTextBox.type = 'url';
+                linkTextBox.placeholder = 'https://open.spotify.com/playlist/...';
+                linkTextBox.style.width = '100%';
+                linkTextBox.style.marginBottom = '1rem';
+                
+                const submitBtn = document.createElement('button');
+                submitBtn.id = 'submit-btn';
+                submitBtn.textContent = 'Load Playlist';
+                
+                // Add elements to container
+                linkEntry.appendChild(linkTextBox);
+                linkEntry.appendChild(submitBtn);
+                
+                openModal("Insert a playlist link", linkEntry.outerHTML);
+
+                setTimeout(() => {
+                    const modalSubmitBtn = document.getElementById('submit-btn');
+                    const modalLinkInput = document.querySelector('#link-entry input');
+                    if (modalSubmitBtn) {
+                        modalSubmitBtn.addEventListener('click', async() => {
+                            const playlistUrl = modalLinkInput.value; // Get from DOM element
+                            if(playlistUrl) {
+                                const playlistId = spotifyManager.extractPlaylistId(playlistUrl);
+                                if (playlistId) {
+                                    console.log("User-inserted playlist identified as: ", playlistId);
+                                    startGameFromPlaylist(playlistId);
+                                    closeModal();
+                                } else {
+                                    showError('❌ Please enter a valid Spotify playlist URL');
+                                    linkTextBox.addEventListener('input', hideError);
+                                }
+                            }
+                        })
+                    }
+                }, 100);
+            }
+        })
     }
 }
 
@@ -328,7 +375,6 @@ class SpotifyManager {
             }
         }
     }
-    
 
     async getUserPlaylists() {
         try {
@@ -422,6 +468,14 @@ class SpotifyManager {
             console.error('Error fetching playlist items:', error);
             throw error;
         }
+    }
+
+    extractPlaylistId(url) {
+        // TODO: expand this to also handle other input types, such as raw ID or URI (low priority)
+        const spotifyPlaylistRegex = /^https:\/\/open\.spotify\.com\/playlist\/([a-zA-Z0-9]{22})(\?.*)?$/;
+
+        const match = url.match(spotifyPlaylistRegex);
+        return match ? match[1] : null;
     }
 }
 
